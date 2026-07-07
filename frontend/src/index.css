@@ -1,0 +1,71 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 86px;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+
+  font-family:
+    Inter,
+    "SF Pro Display",
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+  line-height: 1.5;
+
+  background: #f5f7fb;
+  color: #172033;
+}
+
+:root {
+  --font-sans: Inter, "SF Pro Display", "Segoe UI", Roboto, Arial, sans-serif;
+  --color-ink: #172033;
+  --color-muted: #64748b;
+  --color-soft: #8a97aa;
+  --color-line: #dbe5f2;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f8fbff;
+  --color-page: #f5f7fb;
+  --color-night: #020817;
+  --color-night-soft: #07142a;
+  --color-primary: #2563eb;
+  --color-primary-strong: #0f5fe8;
+  --color-primary-soft: #eaf2ff;
+  --color-teal: #14b8a6;
+  --color-teal-soft: #e8fbf7;
+  --color-amber: #f59e0b;
+  --color-amber-soft: #fff7e6;
+  --shadow-sm: 0 10px 28px rgba(22, 34, 55, 0.06);
+  --shadow-md: 0 22px 60px rgba(22, 34, 55, 0.1);
+  --shadow-lg: 0 32px 90px rgba(6, 19, 43, 0.18);
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 30px;
+  --text-3xl: 42px;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}

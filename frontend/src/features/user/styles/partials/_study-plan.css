@@ -1,0 +1,315 @@
+.study-plan-builder,
+.daily-plan-card,
+.weekly-todo-card {
+  display: grid;
+  gap: 18px;
+}
+
+.weekly-plan-form {
+  display: grid;
+  gap: 12px;
+}
+
+.weekly-plan-owner {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid #e5eaf2;
+  border-radius: 18px;
+  background: #f8fbff;
+}
+
+.weekly-plan-owner button {
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  color: #344054;
+  background: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+
+.weekly-plan-owner button:hover,
+.weekly-plan-owner button.is-active {
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--user-blue), var(--user-cyan));
+  border-color: rgba(255, 255, 255, 0.34);
+  transform: translateY(-1px);
+}
+
+.weekly-plan-field {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #e5eaf2;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+}
+
+.weekly-plan-field span {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.weekly-plan-field input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #dbe7f5;
+  border-radius: 14px;
+  outline: none;
+  padding: 0 14px;
+  color: var(--user-navy);
+  background: #ffffff;
+  font: inherit;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.weekly-plan-field input:focus {
+  border-color: rgba(37, 99, 235, 0.56);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.weekly-plan-summary {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 211, 238, 0.1));
+}
+
+.today-focus-card {
+  display: grid;
+  gap: 14px;
+  align-content: end;
+  min-height: 270px;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 88% 14%, rgba(255, 255, 255, 0.24), transparent 26%),
+    linear-gradient(135deg, #4f46e5, #8b5cf6 48%, #ec4899);
+}
+
+.today-focus-card span,
+.today-focus-card p {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.daily-plan-card {
+  grid-column: 1 / -1;
+}
+
+.daily-plan-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.daily-plan-item {
+  display: grid;
+  grid-template-columns: auto minmax(92px, 0.32fr) minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #e5eaf2;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.daily-plan-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(37, 99, 235, 0.22);
+}
+
+.daily-plan-item input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--user-green);
+}
+
+.daily-plan-item span {
+  min-width: 0;
+  color: var(--user-blue);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.daily-plan-item strong {
+  min-width: 0;
+  color: var(--user-navy);
+  line-height: 1.35;
+}
+
+.daily-plan-item small {
+  justify-self: end;
+  white-space: nowrap;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #047857;
+  background: #dcfce7;
+  font-weight: 950;
+}
+
+.daily-plan-item--completed {
+  border-color: rgba(16, 185, 129, 0.28);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 211, 238, 0.08));
+}
+
+.daily-plan-item--completed strong {
+  color: #667085;
+  text-decoration: line-through;
+}
+
+.weekly-todo-list {
+  display: grid;
+  gap: 10px;
+}
+
+.weekly-plan-item {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr) 92px;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid #e5eaf2;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+}
+
+.weekly-plan-item span {
+  color: var(--user-blue);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.weekly-plan-item strong {
+  min-width: 0;
+  color: var(--user-navy);
+  line-height: 1.35;
+}
+
+.weekly-plan-item small {
+  justify-self: end;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #1d4ed8;
+  background: #eaf4ff;
+  font-weight: 950;
+}
+
+.weekly-todo-item {
+  display: grid;
+  grid-template-columns: auto 104px minmax(0, 1fr) 92px;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid #e5eaf2;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.weekly-todo-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(37, 99, 235, 0.22);
+}
+
+.weekly-todo-item input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--user-green);
+}
+
+.weekly-todo-item span {
+  color: var(--user-blue);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.weekly-todo-item strong {
+  min-width: 0;
+  color: var(--user-navy);
+  line-height: 1.35;
+}
+
+.weekly-todo-item small {
+  justify-self: end;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: var(--user-orange);
+  background: #fff4e8;
+  font-weight: 950;
+}
+
+.weekly-todo-item--completed {
+  border-color: rgba(16, 185, 129, 0.28);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 211, 238, 0.08));
+}
+
+.weekly-todo-item--completed strong {
+  color: #667085;
+  text-decoration: line-through;
+}
+
+.weekly-todo-item--completed small {
+  color: #047857;
+  background: #dcfce7;
+}
+
+.weekly-todo-empty {
+  padding: 22px;
+  border: 1px dashed #bed2ee;
+  border-radius: 20px;
+  color: var(--user-muted);
+  background: #f8fbff;
+  font-weight: 900;
+  text-align: center;
+}
+
+.study-week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  grid-column: 1 / -1;
+}
+
+.study-week-strip div {
+  min-height: 84px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 6px;
+  border: 1px solid #e5eaf2;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.study-week-strip strong {
+  color: var(--user-navy);
+}
+
+.study-week-strip span {
+  color: var(--user-muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.study-week-strip .is-completed {
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--user-green), var(--user-cyan));
+}
+
+.study-week-strip .is-completed strong,
+.study-week-strip .is-completed span {
+  color: #ffffff;
+}
+
