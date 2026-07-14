@@ -3,11 +3,91 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router";
 
 import { userMenu } from "../constants/userMenu";
+import { useUserI18n } from "../i18n/UserI18n";
 
 type UserSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
 };
+
+const GOAL_DEADLINE_KEY = "levelup_goal_deadline";
+const GOAL_TIMELINE_KEY = "levelup_goal_timeline";
+const LEARNING_PROFILE_KEY = "levelup_learning_profile";
+const DEFAULT_GOAL_DAYS = 42;
+
+function getGoalDetails() {
+  let targetScore = "7.5";
+  let timeline = "Not sure yet";
+  try {
+    const profile = JSON.parse(localStorage.getItem(LEARNING_PROFILE_KEY) ?? "{}");
+    if (typeof profile.targetScore === "string" && profile.targetScore) {
+      targetScore = profile.targetScore;
+    }
+    if (typeof profile.timeline === "string" && profile.timeline) {
+      timeline = profile.timeline;
+    }
+  } catch {
+    // Keep the default score when an old profile cannot be parsed.
+  }
+
+  let deadline = Number(localStorage.getItem(GOAL_DEADLINE_KEY));
+  const savedTimeline = localStorage.getItem(GOAL_TIMELINE_KEY);
+
+  if (!Number.isFinite(deadline) || deadline <= 0 || savedTimeline !== timeline) {
+    const targetDate = new Date();
+
+    if (timeline === "1 month") targetDate.setMonth(targetDate.getMonth() + 1);
+    else if (timeline === "3 months") targetDate.setMonth(targetDate.getMonth() + 3);
+    else if (timeline === "6 months") targetDate.setMonth(targetDate.getMonth() + 6);
+    else if (timeline === "1 year") targetDate.setFullYear(targetDate.getFullYear() + 1);
+    else targetDate.setDate(targetDate.getDate() + DEFAULT_GOAL_DAYS);
+
+    deadline = targetDate.getTime();
+    localStorage.setItem(GOAL_DEADLINE_KEY, String(deadline));
+    localStorage.setItem(GOAL_TIMELINE_KEY, timeline);
+  }
+
+  const now = new Date();
+  const totalSeconds = Math.max(0, Math.floor((deadline - now.getTime()) / 1000));
+  const cursor = new Date(now);
+  let years = 0;
+  let months = 0;
+
+  while (years < 100) {
+    const next = new Date(cursor);
+    next.setFullYear(next.getFullYear() + 1);
+    if (next.getTime() > deadline) break;
+    cursor.setTime(next.getTime());
+    years += 1;
+  }
+
+  while (months < 12) {
+    const next = new Date(cursor);
+    next.setMonth(next.getMonth() + 1);
+    if (next.getTime() > deadline) break;
+    cursor.setTime(next.getTime());
+    months += 1;
+  }
+
+  let remainder = Math.max(0, Math.floor((deadline - cursor.getTime()) / 1000));
+  const days = Math.floor(remainder / 86_400);
+  remainder %= 86_400;
+  const hours = Math.floor(remainder / 3_600);
+  remainder %= 3_600;
+  const minutes = Math.floor(remainder / 60);
+  const seconds = remainder % 60;
+
+  return {
+    totalSeconds,
+    years,
+    months,
+    days,
+    hours,
+    minutes,
+    seconds,
+    targetScore,
+  };
+}
 
 const menuIcons: Record<string, ReactNode> = {
   D: (
@@ -104,6 +184,19 @@ function MenuIcon({ icon }: { icon: string }) {
 function UserSidebar({ isOpen, onClose }: UserSidebarProps) {
   const sidebarRef = useRef<HTMLElement>(null);
   const [openGroups, setOpenGroups] = useState<string[]>([]);
+  const [goal, setGoal] = useState(getGoalDetails);
+  const { language } = useUserI18n();
+
+  useEffect(() => {
+    const updateCountdown = () => setGoal(getGoalDetails());
+    const timerId = window.setInterval(updateCountdown, 1_000);
+    window.addEventListener("focus", updateCountdown);
+
+    return () => {
+      window.clearInterval(timerId);
+      window.removeEventListener("focus", updateCountdown);
+    };
+  }, []);
 
   useEffect(() => {
     function closeFlyoutsWhenOutside(target: EventTarget | null) {
@@ -206,9 +299,15 @@ function UserSidebar({ isOpen, onClose }: UserSidebarProps) {
 
         <div className="user-sidebar__footer">
           <span>Premium tayyorgarlik</span>
-          <strong>IELTS 7.5 sari 42 kun</strong>
+          <strong>
+            IELTS {goal.targetScore}:
+            <br />
+            {language === "en" && `${goal.years > 0 ? `${goal.years} year ` : ""}${goal.months} month ${goal.days} day ${goal.hours} hour ${goal.minutes} min ${goal.seconds} second`}
+            {language === "ru" && `${goal.years > 0 ? `${goal.years} г. ` : ""}${goal.months} мес. ${goal.days} д. ${goal.hours} ч. ${goal.minutes} мин. ${goal.seconds} сек.`}
+            {language === "uz" && `${goal.years > 0 ? `${goal.years} yil ` : ""}${goal.months} oy ${goal.days} kun ${goal.hours} soat ${goal.minutes} daqiqa ${goal.seconds} sekund`}
+          </strong>
           <div className="user-sidebar__progress" aria-hidden="true">
-            <i />
+            <i style={{ width: `${Math.min(100, (goal.totalSeconds / (DEFAULT_GOAL_DAYS * 86_400)) * 100)}%` }} />
           </div>
         </div>
       </aside>

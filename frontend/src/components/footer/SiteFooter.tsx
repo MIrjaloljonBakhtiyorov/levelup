@@ -57,7 +57,7 @@ function SiteFooter() {
                 <span />
               </span>
 
-              <strong>EduSkill</strong>
+              <strong>LevelUp</strong>
             </Link>
 
             <p>
@@ -65,8 +65,8 @@ function SiteFooter() {
             </p>
 
             <div className="site-footer__cta">
-              <span>Start your English journey</span>
-              <Link to="/register">Create free account <b>→</b></Link>
+              <span>{t("Start your English journey")}</span>
+              <Link to="/register">{t("Create free account")} <b>→</b></Link>
             </div>
 
             <div className="site-footer__socials">

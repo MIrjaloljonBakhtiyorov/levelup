@@ -77,15 +77,15 @@ function FinalCtaSection() {
 
           <div className="cta-books">
             <div className="cta-book cta-book--one">
-              IELTS ACADEMIC
+              {t("IELTS ACADEMIC")}
             </div>
 
             <div className="cta-book cta-book--two">
-              GRAMMAR IN USE
+              {t("GRAMMAR IN USE")}
             </div>
 
             <div className="cta-book cta-book--three">
-              VOCABULARY
+              {t("VOCABULARY")}
             </div>
           </div>
 

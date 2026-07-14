@@ -1,41 +1,61 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 
-import {
-  registerSchema,
-  type RegisterFormData,
-} from "../schemas/authSchemas";
+import { createRegisterSchema, type RegisterFormData } from "../schemas/authSchemas";
 import { registerUser } from "../services/authApi";
 import { clearAdminToken } from "../services/adminSession";
+import { clearRegisterDraft, getRegisterDraft, saveRegisterDraft } from "../services/authDrafts";
 import {
   setOnboardingRedirectTarget,
   setUserSession,
 } from "../services/userSession";
+import { useHomeI18n } from "../../home/i18n/HomeI18n";
 
 function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [formMessage, setFormMessage] = useState("");
+  const [messageTone, setMessageTone] = useState<"error" | "success">("success");
   const navigate = useNavigate();
+  const { language, t } = useHomeI18n();
+  const schema = useMemo(() => createRegisterSchema(t), [t]);
+  const savedDraft = useMemo(() => getRegisterDraft(), []);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    watch,
+    trigger,
+    formState: { errors, isSubmitting, isSubmitted },
   } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      middleName: "",
-      phoneNumber: "",
-      email: "",
+      firstName: savedDraft.firstName,
+      lastName: savedDraft.lastName,
+      middleName: savedDraft.middleName,
+      phoneNumber: savedDraft.phoneNumber,
+      email: savedDraft.email,
       password: "",
       confirmPassword: "",
-      acceptTerms: false,
+      acceptTerms: savedDraft.acceptTerms,
     },
   });
+
+  const firstName = watch("firstName");
+  const lastName = watch("lastName");
+  const middleName = watch("middleName");
+  const phoneNumber = watch("phoneNumber");
+  const email = watch("email");
+  const acceptTerms = watch("acceptTerms");
+
+  useEffect(() => {
+    saveRegisterDraft({ firstName, lastName, middleName, phoneNumber, email, acceptTerms });
+  }, [acceptTerms, email, firstName, lastName, middleName, phoneNumber]);
+
+  useEffect(() => {
+    if (isSubmitted) void trigger();
+  }, [isSubmitted, language, trigger]);
 
   async function onSubmit(data: RegisterFormData) {
     setFormMessage("");
@@ -47,22 +67,25 @@ function RegisterPage() {
       setOnboardingRedirectTarget("/user/dashboard");
     } catch {
       setFormMessage("Unable to create your account. The email may already be in use.");
+      setMessageTone("error");
       return;
     }
 
     setFormMessage("Account created. Let’s set up your study plan.");
+    setMessageTone("success");
+    clearRegisterDraft();
     window.setTimeout(() => navigate("/onboarding"), 700);
   }
 
   return (
-    <div className="auth-form">
+    <div className="auth-form auth-form--register">
       <div className="auth-form__header">
-        <span className="auth-form__eyebrow">Start for free</span>
+        <span className="auth-form__eyebrow">{t("Start for free")}</span>
 
-        <h2>Create your account</h2>
+        <h2>{t("Create your account")}</h2>
 
         <p>
-          Sign up to receive your personalized study plan.
+          {t("Sign up to receive your personalized study plan.")}
         </p>
       </div>
 
@@ -71,15 +94,19 @@ function RegisterPage() {
         onSubmit={handleSubmit(onSubmit)}
         noValidate
       >
-        {formMessage && <p className="auth-alert auth-alert--success">{formMessage}</p>}
+        {formMessage && (
+          <p className={`auth-alert${messageTone === "success" ? " auth-alert--success" : ""}`}>
+            {t(formMessage)}
+          </p>
+        )}
 
-        <div className="auth-field">
-          <label htmlFor="register-first-name">First name</label>
+        <div className="auth-field auth-field--third">
+          <label htmlFor="register-first-name">{t("First name")}</label>
 
           <input
             id="register-first-name"
             type="text"
-            placeholder="Your first name"
+            placeholder={t("Your first name")}
             autoComplete="given-name"
             aria-invalid={Boolean(errors.firstName)}
             {...register("firstName")}
@@ -92,13 +119,13 @@ function RegisterPage() {
           )}
         </div>
 
-        <div className="auth-field">
-          <label htmlFor="register-last-name">Last name</label>
+        <div className="auth-field auth-field--third">
+          <label htmlFor="register-last-name">{t("Last name")}</label>
 
           <input
             id="register-last-name"
             type="text"
-            placeholder="Your last name"
+            placeholder={t("Your last name")}
             autoComplete="family-name"
             aria-invalid={Boolean(errors.lastName)}
             {...register("lastName")}
@@ -111,13 +138,13 @@ function RegisterPage() {
           )}
         </div>
 
-        <div className="auth-field">
-          <label htmlFor="register-middle-name">Middle name</label>
+        <div className="auth-field auth-field--third">
+          <label htmlFor="register-middle-name">{t("Middle name")}</label>
 
           <input
             id="register-middle-name"
             type="text"
-            placeholder="Your middle name (optional)"
+            placeholder={t("Your middle name (optional)")}
             autoComplete="additional-name"
             aria-invalid={Boolean(errors.middleName)}
             {...register("middleName")}
@@ -130,8 +157,8 @@ function RegisterPage() {
           )}
         </div>
 
-        <div className="auth-field">
-          <label htmlFor="register-phone">Phone number</label>
+        <div className="auth-field auth-field--half">
+          <label htmlFor="register-phone">{t("Phone number")}</label>
 
           <input
             id="register-phone"
@@ -149,8 +176,8 @@ function RegisterPage() {
           )}
         </div>
 
-        <div className="auth-field">
-          <label htmlFor="register-email">Email address</label>
+        <div className="auth-field auth-field--half">
+          <label htmlFor="register-email">{t("Email address")}</label>
 
           <input
             id="register-email"
@@ -168,14 +195,14 @@ function RegisterPage() {
           )}
         </div>
 
-        <div className="auth-field">
-          <label htmlFor="register-password">Password</label>
+        <div className="auth-field auth-field--half">
+          <label htmlFor="register-password">{t("Password")}</label>
 
           <div className="auth-password">
             <input
               id="register-password"
               type={showPassword ? "text" : "password"}
-              placeholder="At least 8 characters"
+              placeholder={t("At least 8 characters")}
               autoComplete="new-password"
               aria-invalid={Boolean(errors.password)}
               {...register("password")}
@@ -185,7 +212,7 @@ function RegisterPage() {
               type="button"
               onClick={() => setShowPassword((current) => !current)}
             >
-              {showPassword ? "Hide" : "Show"}
+              {showPassword ? t("Hide") : t("Show")}
             </button>
           </div>
 
@@ -196,15 +223,15 @@ function RegisterPage() {
           )}
         </div>
 
-        <div className="auth-field">
+        <div className="auth-field auth-field--half">
           <label htmlFor="register-confirm-password">
-            Confirm password
+            {t("Confirm password")}
           </label>
 
           <input
             id="register-confirm-password"
             type={showPassword ? "text" : "password"}
-            placeholder="Enter your password again"
+            placeholder={t("Enter your password again")}
             autoComplete="new-password"
             aria-invalid={Boolean(errors.confirmPassword)}
             {...register("confirmPassword")}
@@ -222,8 +249,8 @@ function RegisterPage() {
             <input type="checkbox" {...register("acceptTerms")} />
 
             <span>
-              I agree to the <Link to="/terms">Terms of Use</Link> and{" "}
-              <Link to="/privacy">Privacy Policy</Link>.
+              {t("I agree to the ")}<Link to="/terms">{t("Terms of Use")}</Link>{t(" and ")}
+              <Link to="/privacy">{t("Privacy Policy")}</Link>.
             </span>
           </label>
 
@@ -239,17 +266,17 @@ function RegisterPage() {
           type="submit"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Creating account..." : "Create account"}
+          {isSubmitting ? t("Creating account...") : t("Create account")}
         </button>
       </form>
 
       <p className="auth-form__switch">
-        Already have an account?
-        <Link to="/login"> Sign in</Link>
+        {t("Already have an account?")}
+        <Link to="/login"> {t("Sign in")}</Link>
       </p>
 
       <Link className="auth-back-link" to="/">
-        ← Back to home
+        ← {t("Back to home")}
       </Link>
     </div>
   );

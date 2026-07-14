@@ -8,7 +8,7 @@ type ResourceItem = {
   icon: string;
   title: string;
   level: string;
-  duration: string;
+  lessonCount: number;
   description: string;
   access: "free";
   category: string;
@@ -36,17 +36,23 @@ const categoryIcons: Record<string, string> = {
   CEFR: "C",
   TOEFL: "T",
   SAT: "S",
+  Grammar: "G",
   "General English": "A",
 };
 
 function toResource(course: FreeLessonCourse): ResourceItem {
+  const summary = course.description
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find(Boolean) ?? course.description;
+
   return {
     id: course.id,
     icon: categoryIcons[course.category] ?? "▶",
     title: course.title,
     level: course.level,
-    duration: `${course.lessonCount} free lessons`,
-    description: course.description,
+    lessonCount: course.lessonCount,
+    description: summary,
     access: "free",
     category: course.category,
     logoUrl: course.logoUrl,
@@ -57,16 +63,19 @@ function toResource(course: FreeLessonCourse): ResourceItem {
 
 function ResourceCard({ resource }: { resource: ResourceItem }) {
   const { t } = useHomeI18n();
+  const title = t(resource.title);
+  const description = t(resource.description);
+  const duration = t("{count} free lessons", { count: resource.lessonCount });
 
   return (
     <article className="resource-card">
       <div className="resource-card__cover">
         {resource.logoUrl ? (
-          <img src={resource.logoUrl} alt={`${resource.title} course logo`} loading="lazy" />
+          <img src={resource.logoUrl} alt={t("{title} course logo", { title })} loading="lazy" />
         ) : (
           <span>{resource.icon}</span>
         )}
-        <span className="resource-card__category">{resource.category}</span>
+        <span className="resource-card__category">{t(resource.category)}</span>
       </div>
 
       <div className="resource-card__top">
@@ -77,10 +86,10 @@ function ResourceCard({ resource }: { resource: ResourceItem }) {
         </span>
       </div>
 
-      <h3>{t(resource.title)}</h3>
+      <h3>{title}</h3>
 
       <p className="resource-card__description">
-        {t(resource.description)}
+        {description}
       </p>
 
       <div className="resource-card__mentor">
@@ -90,8 +99,8 @@ function ResourceCard({ resource }: { resource: ResourceItem }) {
           <span>{resource.mentorName.slice(0, 1) || "M"}</span>
         )}
         <div>
-          <small>Mentor</small>
-          <strong>{resource.mentorName || "Professional mentor"}</strong>
+          <small>{t("Mentor")}</small>
+          <strong>{resource.mentorName || t("Professional mentor")}</strong>
         </div>
       </div>
 
@@ -103,7 +112,7 @@ function ResourceCard({ resource }: { resource: ResourceItem }) {
 
         <div>
           <span>{t("Duration")}</span>
-          <strong>{t(resource.duration)}</strong>
+          <strong>{duration}</strong>
         </div>
       </div>
 
@@ -111,7 +120,7 @@ function ResourceCard({ resource }: { resource: ResourceItem }) {
         <button
           className="resource-card__save"
           type="button"
-          aria-label={`Save ${resource.title}`}
+          aria-label={t("Save {title}", { title })}
         >
           ♡
         </button>
@@ -210,11 +219,11 @@ function ResourcesCenterSection() {
           </button>
         </header>
 
-        <div className="resources-center-section__grid" aria-label="Resources list">
-          {loading && <div className="resources-center-section__state">Loading free lessons...</div>}
-          {!loading && error && <div className="resources-center-section__state resources-center-section__state--error">{error}</div>}
+        <div className="resources-center-section__grid" aria-label={t("Resources list")}>
+          {loading && <div className="resources-center-section__state">{t("Loading free lessons...")}</div>}
+          {!loading && error && <div className="resources-center-section__state resources-center-section__state--error">{t(error)}</div>}
           {!loading && !error && visibleResources.length === 0 && (
-            <div className="resources-center-section__state">No free lessons are available yet.</div>
+            <div className="resources-center-section__state">{t("No free lessons are available yet.")}</div>
           )}
           {visibleResources.map((resource) => (
             <ResourceCard key={resource.id} resource={resource} />

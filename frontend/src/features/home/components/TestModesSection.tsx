@@ -66,20 +66,12 @@ function ListeningCard() {
             <span>00:42</span>
 
             <div className="listening-preview__controls">
-              <button type="button" aria-label="Previous audio">
-                &#8249;
-              </button>
-
               <button
                 className="listening-preview__play"
                 type="button"
-                aria-label="Play audio"
+                aria-label={t("Play audio")}
               >
                 &#9654;
-              </button>
-
-              <button type="button" aria-label="Next audio">
-                &#8250;
               </button>
             </div>
 
@@ -158,7 +150,7 @@ function ReadingCard() {
           </div>
         </div>
 
-        <div className="reading-pagination" aria-label="Reading pages">
+        <div className="reading-pagination" aria-label={t("Reading pages")}>
           <button type="button">19</button>
           <button className="reading-pagination__active" type="button">
             20
@@ -234,7 +226,7 @@ function MockTestCard() {
 
                 <div>
                   <small>{t(section.duration)}</small>
-                  <strong aria-label="Ready">&#10003;</strong>
+                  <strong aria-label={t("Ready")}>&#10003;</strong>
                 </div>
               </div>
             ))}
@@ -299,7 +291,7 @@ function ExamProgramCard({ exam }: { exam: (typeof examPrograms)[number] }) {
     <article className={`exam-program-card exam-program-card--${exam.accent}`}>
       <header className="exam-program-card__header">
         <span className="exam-program-card__code">{exam.code}</span>
-        <span className="exam-program-card__duration">{exam.duration}</span>
+        <span className="exam-program-card__duration">{t(exam.duration)}</span>
       </header>
 
       <h3>{t(exam.title)}</h3>
@@ -321,7 +313,7 @@ function ExamProgramCard({ exam }: { exam: (typeof examPrograms)[number] }) {
       </div>
 
       <footer className="exam-program-card__footer">
-        <span>{exam.questions}</span>
+        <span>{t(exam.questions)}</span>
         <button type="button" onClick={() => navigate("/login")}>{t("Start Exam")}</button>
       </footer>
     </article>

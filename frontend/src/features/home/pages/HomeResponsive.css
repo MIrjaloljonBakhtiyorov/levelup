@@ -1,0 +1,275 @@
+/* Landing-page layout safeguards shared by every viewport. */
+.public-layout,
+.public-layout main {
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.public-layout :is(img, video, svg) {
+  max-width: 100%;
+}
+
+@media (max-width: 1180px) {
+  .teachers-reviews-section,
+  .resources-center-section,
+  .partners-section {
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+
+  .teachers-panel,
+  .reviews-panel,
+  .resources-center-section__container,
+  .partners-section__container {
+    padding: 26px;
+  }
+
+  .course-reviews__intro {
+    column-gap: 26px;
+  }
+
+  .course-reviews__stats div {
+    min-height: 78px;
+    padding: 11px;
+  }
+
+  .course-reviews__stats strong {
+    font-size: 19px;
+  }
+
+  .resource-card {
+    min-height: 350px;
+  }
+
+  .partners-section__heading h2 {
+    white-space: normal;
+  }
+}
+
+/* Tablet: preserve generous reading space while switching dense sections to two columns. */
+@media (min-width: 761px) and (max-width: 1024px) {
+  .hero-v2__title {
+    max-width: 520px;
+    font-size: clamp(36px, 5.1vw, 50px);
+  }
+
+  .hero-v2__desc {
+    max-width: 440px;
+  }
+
+  .teachers-reviews-section {
+    padding-bottom: 42px;
+  }
+
+  .teachers-panel,
+  .reviews-panel {
+    border-radius: 18px;
+  }
+
+  .teachers-strip {
+    padding-right: 4px;
+    padding-left: 4px;
+  }
+
+  .teacher-card {
+    flex-basis: 310px;
+    min-height: 530px;
+  }
+
+  .teacher-card:hover,
+  .teacher-card--active {
+    flex-basis: 326px;
+    min-height: 548px;
+  }
+
+  .course-reviews__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 520px;
+  }
+
+  .resources-center-section__heading h2,
+  .partners-section__heading h2 {
+    font-size: clamp(30px, 4vw, 40px);
+  }
+
+  .site-footer {
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    position: relative;
+    z-index: 1001;
+  }
+
+  .teachers-reviews-section,
+  .resources-center-section,
+  .partners-section {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .teachers-reviews-section__panels {
+    gap: 16px;
+    margin-top: 18px;
+  }
+
+  .teachers-panel,
+  .reviews-panel,
+  .resources-center-section__container,
+  .partners-section__container {
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .teachers-reviews-section__heading > span,
+  .teachers-panel__heading > span,
+  .course-reviews__intro > span,
+  .partners-section__eyebrow {
+    min-height: 28px;
+    padding-right: 10px;
+    padding-left: 10px;
+    font-size: 10px;
+  }
+
+  .teachers-reviews-section__heading h2,
+  .resources-center-section__heading h2,
+  .partners-section__heading h2 {
+    font-size: clamp(26px, 7.2vw, 34px);
+    line-height: 1.13;
+  }
+
+  .teachers-reviews-section__heading p,
+  .resources-center-section__heading p,
+  .partners-section__heading p {
+    font-size: 13px;
+    line-height: 1.58;
+  }
+
+  .course-reviews__intro h3,
+  .teachers-panel__heading h3 {
+    font-size: 23px;
+  }
+
+  .course-reviews__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .course-reviews__stats div {
+    min-height: 76px;
+    padding: 10px;
+  }
+
+  .course-reviews__stats strong {
+    font-size: 19px;
+  }
+
+  .course-review-card {
+    min-height: 285px;
+  }
+
+  .resources-center-section__heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .resources-center-section__all-button {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    background: #eff6ff;
+    font-size: 13px;
+  }
+
+  .resources-center-section__grid {
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .resource-card,
+  .resource-card--more {
+    min-height: 0;
+  }
+
+  .resource-card__cover {
+    height: 102px;
+  }
+
+  .partners-section__marquee {
+    margin-right: -2px;
+    margin-left: -2px;
+  }
+
+  .partner-card {
+    flex-basis: min(84vw, 330px);
+  }
+
+  .site-footer__brand-block {
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar__text {
+    max-width: 100%;
+  }
+
+  .teachers-panel,
+  .reviews-panel,
+  .resources-center-section__container,
+  .partners-section__container {
+    padding: 16px;
+  }
+
+  .teacher-card {
+    flex-basis: min(83vw, 300px);
+  }
+
+  .teacher-card:hover,
+  .teacher-card--active {
+    flex-basis: min(85vw, 310px);
+  }
+
+  .course-review-card {
+    flex-basis: min(82vw, 300px);
+    padding: 18px;
+  }
+
+  .course-review-card p {
+    font-size: 12px;
+    line-height: 1.62;
+  }
+
+  .resource-card {
+    padding: 14px;
+  }
+
+  .resource-card__cover {
+    height: 92px;
+  }
+
+  .resource-card__actions {
+    gap: 8px;
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .partner-card {
+    flex-basis: min(85vw, 312px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-v2__card,
+  .teacher-card,
+  .course-review-card,
+  .resource-card,
+  .partner-card {
+    transition: none;
+  }
+}

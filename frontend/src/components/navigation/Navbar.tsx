@@ -105,7 +105,7 @@ function Navbar() {
       <span className="navbar-user">{userProfile.firstName}</span>
 
       <button className="navbar-login" type="button" onClick={logoutUser}>
-        {t("Chiqish")}
+        {t("Sign out")}
       </button>
     </>
   ) : (
@@ -134,7 +134,7 @@ function Navbar() {
         <Link
           className="navbar-brand"
           to="/"
-          aria-label="LevelUp bosh sahifasi"
+          aria-label={t("LevelUp home page")}
           onClick={closeMenu}
         >
           <span className="navbar-brand__icon" aria-hidden="true">
@@ -150,7 +150,7 @@ function Navbar() {
           className={`navbar-menu ${
             isMenuOpen ? "navbar-menu--open" : ""
           }`}
-          aria-label="Asosiy navigatsiya"
+          aria-label={t("Primary navigation")}
         >
           <div className="navbar-menu__links">
             {navigationItems.map((item) => (
@@ -180,7 +180,7 @@ function Navbar() {
             isMenuOpen ? "navbar-toggle--open" : ""
           }`}
           type="button"
-          aria-label="Navigatsiya menyusini ochish"
+          aria-label={t(isMenuOpen ? "Close navigation menu" : "Open navigation menu")}
           aria-expanded={isMenuOpen}
           onClick={toggleMenu}
         >

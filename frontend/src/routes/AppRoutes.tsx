@@ -50,6 +50,8 @@ import TestRunnerPage        from "../features/user/pages/TestRunnerPage";
 import UserLayout            from "../features/user/components/UserLayout";
 import UserDashboardPage     from "../features/user/pages/UserDashboardPage";
 import PublicLayout          from "../layouts/PublicLayout";
+import { HomeI18nProvider } from "../features/home/i18n/HomeI18n";
+import { PrivacyPage, TermsPage } from "../features/legal/pages/LegalPage";
 
 function AppRoutes() {
   return (
@@ -58,10 +60,12 @@ function AppRoutes() {
         {/* ── Public ── */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
         </Route>
 
         {/* ── Auth ── */}
-        <Route element={<AuthLayout />}>
+        <Route element={<HomeI18nProvider><AuthLayout /></HomeI18nProvider>}>
           <Route path="/login"    element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
         </Route>

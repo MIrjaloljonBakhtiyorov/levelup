@@ -16,6 +16,7 @@ export type OnboardingAnswer = {
 
 export type OnboardingStep = {
   key: keyof OnboardingAnswer;
+  label: string;
   question: string;
   subtitle: string;
   options: string[];
@@ -24,14 +25,16 @@ export type OnboardingStep = {
 const onboardingSteps: OnboardingStep[] = [
   {
     key: "exam",
-    question: "Qaysi imtihonga tayyorlanyapsiz?",
-    subtitle: "Reja aynan imtihon formatiga moslashadi.",
-    options: ["IELTS", "Multilevel / CEFR", "TOEFL", "SAT", "Hali bilmayman"],
+    label: "Exam",
+    question: "Which exam are you preparing for?",
+    subtitle: "Your plan will be tailored to the exact exam format.",
+    options: ["IELTS", "Multilevel / CEFR", "TOEFL", "SAT", "Not sure yet"],
   },
   {
     key: "level",
-    question: "Hozirgi darajangiz qanday?",
-    subtitle: "Boshlang‘ich nuqtani tanlasak, yo‘l aniqroq bo‘ladi.",
+    label: "Current level",
+    question: "What is your current English level?",
+    subtitle: "Choosing a starting point helps us make your path clearer.",
     options: [
       "Beginner",
       "Elementary",
@@ -39,31 +42,35 @@ const onboardingSteps: OnboardingStep[] = [
       "Intermediate",
       "Upper-Intermediate",
       "Advanced",
-      "Bilmayman",
+      "Not sure yet",
     ],
   },
   {
     key: "targetScore",
-    question: "Maqsad ballingiz nechchi?",
-    subtitle: "Maqsad ball sizga kerakli tezlik va mashqlarni belgilaydi.",
+    label: "Target score",
+    question: "What target score are you aiming for?",
+    subtitle: "Your target score helps set the right pace and practice level.",
     options: ["5.5", "6.0", "6.5", "7.0", "7.5", "8.0+"],
   },
   {
     key: "timeline",
-    question: "Qancha vaqtda erishmoqchisiz?",
-    subtitle: "Muddat reja intensivligini tanlashga yordam beradi.",
-    options: ["1 oy", "3 oy", "6 oy", "1 yil", "Aniq bilmayman"],
+    label: "Timeline",
+    question: "How soon do you want to reach your goal?",
+    subtitle: "Your timeline helps us choose the right study intensity.",
+    options: ["1 month", "3 months", "6 months", "1 year", "Not sure yet"],
   },
   {
     key: "dailyTime",
-    question: "Kuniga qancha vaqt ajrata olasiz?",
-    subtitle: "Kunlik vaqtga qarab realistik study plan tuziladi.",
-    options: ["30 daqiqa", "1 soat", "2 soat", "3+ soat"],
+    label: "Daily time",
+    question: "How much time can you study each day?",
+    subtitle: "Your daily availability helps us create a realistic study plan.",
+    options: ["30 minutes", "1 hour", "2 hours", "3+ hours"],
   },
   {
     key: "weakSkill",
-    question: "Qaysi skill eng zaif?",
-    subtitle: "Zaif joyingiz rejaning birinchi fokusiga aylanadi.",
+    label: "Focus skill",
+    question: "Which skill needs the most improvement?",
+    subtitle: "The area you select will become your plan's first focus.",
     options: [
       "Listening",
       "Reading",
@@ -71,7 +78,7 @@ const onboardingSteps: OnboardingStep[] = [
       "Speaking",
       "Grammar",
       "Vocabulary",
-      "Bilmayman",
+      "Not sure yet",
     ],
   },
 ];
@@ -99,7 +106,7 @@ function OnboardingPage() {
   const answeredSteps = useMemo(
     () =>
       onboardingSteps.filter((step) => answers[step.key]).map((step) => ({
-        label: step.question,
+        label: step.label,
         value: answers[step.key],
       })),
     [answers],
@@ -129,7 +136,7 @@ function OnboardingPage() {
     }
 
     localStorage.setItem(LEARNING_PROFILE_KEY, JSON.stringify(answers));
-    navigate("/onboarding/preparing");
+    navigate("/onboarding/preparing", { replace: true });
   }
 
   return (
@@ -143,33 +150,42 @@ function OnboardingPage() {
 
           <div className="onboarding-panel__copy">
             <span>AI study plan</span>
-            <h1>O‘qish rejangizni sizga moslab tuzamiz.</h1>
+            <h1>We’ll tailor your study plan to you.</h1>
             <p>
-              6 ta qisqa savolga javob bering. Keyin sizga maqsad, vaqt va
-              zaif skill bo‘yicha shaxsiy o‘quv yo‘nalishi tayyorlanadi.
+              Answer six quick questions. We’ll then create a personalized
+              study path based on your goal, available time, and areas to improve.
             </p>
           </div>
 
-          <div className="onboarding-summary">
-            <div className="onboarding-summary__header">
-              <span>Tanlangan javoblar</span>
-              <strong>{answeredSteps.length}/{onboardingSteps.length}</strong>
+          <div className="onboarding-panel__bottom">
+            <div className="onboarding-mentor">
+              <img
+                src="https://i.pinimg.com/736x/39/66/f2/3966f2a6890b2951d3e9c927aa7b3378.jpg"
+                alt="LevelUp study mentor"
+              />
             </div>
 
-            {answeredSteps.length > 0 ? (
-              <div className="onboarding-summary__list">
-                {answeredSteps.map((item) => (
-                  <div className="onboarding-summary__item" key={item.label}>
-                    <span>{item.label}</span>
-                    <strong>{item.value}</strong>
-                  </div>
-                ))}
+            <div className="onboarding-summary">
+              <div className="onboarding-summary__header">
+                <span>Your answers</span>
+                <strong>{answeredSteps.length}/{onboardingSteps.length}</strong>
               </div>
-            ) : (
-              <p className="onboarding-summary__empty">
-                Javob tanlaganingiz sari qisqa summary shu yerda ko‘rinadi.
-              </p>
-            )}
+
+              {answeredSteps.length > 0 ? (
+                <div className="onboarding-summary__list">
+                  {answeredSteps.map((item) => (
+                    <div className="onboarding-summary__item" key={item.label}>
+                      <span>{item.label}</span>
+                      <strong>{item.value}</strong>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="onboarding-summary__empty">
+                  A quick summary of your choices will appear here as you go.
+                </p>
+              )}
+            </div>
           </div>
         </aside>
 
@@ -216,7 +232,7 @@ function OnboardingPage() {
               disabled={currentStepIndex === 0}
               onClick={goBack}
             >
-              Orqaga
+              Back
             </button>
 
             <button
@@ -226,8 +242,8 @@ function OnboardingPage() {
               onClick={continueOnboarding}
             >
               {currentStepIndex === onboardingSteps.length - 1
-                ? "Rejani yaratish"
-                : "Davom etish"}
+                ? "Create my plan"
+                : "Continue"}
             </button>
           </div>
         </section>

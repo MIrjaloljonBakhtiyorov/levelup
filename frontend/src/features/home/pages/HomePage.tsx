@@ -3,6 +3,7 @@ import PartnersSection from "../components/PartnersSection";
 import ResourcesCenterSection from "../components/ResourcesCenterSection";
 import TeachersReviewsSection from "../components/TeachersReviewsSection";
 import TestModesSection from "../components/TestModesSection";
+import "./HomeResponsive.css";
 
 function HomePage() {
   const location = useLocation();

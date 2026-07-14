@@ -1,34 +1,52 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 
-import { loginSchema, type LoginFormData } from "../schemas/authSchemas";
+import { createLoginSchema, type LoginFormData } from "../schemas/authSchemas";
 import { loginAdmin, loginUser } from "../services/authApi";
 import { clearAdminToken, setAdminToken } from "../services/adminSession";
+import { clearLoginDraft, getLoginDraft, saveLoginDraft } from "../services/authDrafts";
 import {
   clearOnboardingRedirectTarget,
   clearUserSession,
   setUserSession,
 } from "../services/userSession";
+import { useHomeI18n } from "../../home/i18n/HomeI18n";
 
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [formMessage, setFormMessage] = useState("");
   const navigate = useNavigate();
+  const { language, t } = useHomeI18n();
+  const schema = useMemo(() => createLoginSchema(t), [t]);
+  const savedDraft = useMemo(() => getLoginDraft(), []);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    watch,
+    trigger,
+    formState: { errors, isSubmitting, isSubmitted },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
-      login: "",
+      login: savedDraft.login,
       password: "",
-      rememberMe: false,
+      rememberMe: savedDraft.rememberMe,
     },
   });
+
+  const login = watch("login");
+  const rememberMe = watch("rememberMe");
+
+  useEffect(() => {
+    saveLoginDraft({ login, rememberMe });
+  }, [login, rememberMe]);
+
+  useEffect(() => {
+    if (isSubmitted) void trigger();
+  }, [isSubmitted, language, trigger]);
 
   async function onSubmit(data: LoginFormData) {
     setFormMessage("");
@@ -38,6 +56,7 @@ function LoginPage() {
         const result = await loginUser(data);
         clearAdminToken();
         setUserSession(result.token, result.user);
+        clearLoginDraft();
         navigate("/user/dashboard", { replace: true });
         return;
       }
@@ -46,6 +65,7 @@ function LoginPage() {
       clearUserSession();
       clearOnboardingRedirectTarget();
       setAdminToken(adminResult.token);
+      clearLoginDraft();
       navigate("/admin", { replace: true });
     } catch (error) {
       setFormMessage(
@@ -58,12 +78,12 @@ function LoginPage() {
   return (
     <div className="auth-form">
       <div className="auth-form__header">
-        <span className="auth-form__eyebrow">Welcome back</span>
+        <span className="auth-form__eyebrow">{t("Welcome back")}</span>
 
-        <h2>Sign in to your account</h2>
+        <h2>{t("Sign in to your account")}</h2>
 
         <p>
-          Continue your study plan, review your test results, and resume your courses.
+          {t("Continue your study plan, review your test results, and resume your courses.")}
         </p>
       </div>
 
@@ -72,15 +92,15 @@ function LoginPage() {
         onSubmit={handleSubmit(onSubmit)}
         noValidate
       >
-        {formMessage && <p className="auth-alert">{formMessage}</p>}
+        {formMessage && <p className="auth-alert">{t(formMessage)}</p>}
 
         <div className="auth-field">
-          <label htmlFor="login-username">Email or admin username</label>
+          <label htmlFor="login-username">{t("Email or admin username")}</label>
 
           <input
             id="login-username"
             type="text"
-            placeholder="example@email.com or admin username"
+            placeholder={t("example@email.com or admin username")}
             autoComplete="username"
             aria-invalid={Boolean(errors.login)}
             {...register("login")}
@@ -93,16 +113,16 @@ function LoginPage() {
 
         <div className="auth-field">
           <div className="auth-field__label-row">
-            <label htmlFor="login-password">Password</label>
+            <label htmlFor="login-password">{t("Password")}</label>
 
-            <span>User or admin password</span>
+            <span>{t("User or admin password")}</span>
           </div>
 
           <div className="auth-password">
             <input
               id="login-password"
               type={showPassword ? "text" : "password"}
-              placeholder="Enter your password"
+              placeholder={t("Enter your password")}
               autoComplete="current-password"
               aria-invalid={Boolean(errors.password)}
               {...register("password")}
@@ -112,7 +132,7 @@ function LoginPage() {
               type="button"
               onClick={() => setShowPassword((current) => !current)}
             >
-              {showPassword ? "Hide" : "Show"}
+              {showPassword ? t("Hide") : t("Show")}
             </button>
           </div>
 
@@ -126,21 +146,21 @@ function LoginPage() {
         <label className="auth-checkbox">
           <input type="checkbox" {...register("rememberMe")} />
 
-          <span>Remember me</span>
+          <span>{t("Remember me")}</span>
         </label>
 
         <button className="auth-submit" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Signing in..." : "Sign in"}
+          {isSubmitting ? t("Signing in...") : t("Sign in")}
         </button>
       </form>
 
       <p className="auth-form__switch">
-        Don&apos;t have an account?
-        <Link to="/register"> Create one</Link>
+        {t("Don't have an account?")}
+        <Link to="/register"> {t("Create one")}</Link>
       </p>
 
       <Link className="auth-back-link" to="/">
-        ← Back to home
+        ← {t("Back to home")}
       </Link>
     </div>
   );

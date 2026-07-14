@@ -26,7 +26,7 @@ type CourseReview = {
   name: string;
   course: string;
   quote: string;
-  result: string;
+  result: { from: string; to: string };
   initials: string;
 };
 
@@ -99,7 +99,7 @@ const reviews: CourseReview[] = [
     course: "IELTS Intensive",
     quote:
       "Before joining the platform, I repeated the same Writing mistakes without understanding why. The structured lessons, detailed teacher comments and weekly progress reports helped me improve every criterion and write with confidence under exam conditions.",
-    result: "6.0 to 7.5",
+    result: { from: "6.0", to: "7.5" },
     initials: "NL",
   },
   {
@@ -108,7 +108,7 @@ const reviews: CourseReview[] = [
     course: "Multilevel C1",
     quote:
       "The CEFR mock tests felt very close to the real exam, so I learned to manage both time and pressure. My mentor used my analytics to build a personal study plan, and every week I could clearly see which skills were improving.",
-    result: "B2 to C1",
+    result: { from: "B2", to: "C1" },
     initials: "SM",
   },
   {
@@ -117,7 +117,7 @@ const reviews: CourseReview[] = [
     course: "TOEFL Preparation",
     quote:
       "I used to run out of time in TOEFL Reading and lose easy points in Listening. The platform taught me practical strategies, gave me realistic timed practice and explained every error, which made my final result much stronger.",
-    result: "92 to 108",
+    result: { from: "92", to: "108" },
     initials: "DK",
   },
   {
@@ -125,7 +125,7 @@ const reviews: CourseReview[] = [
     name: "Malika R.",
     course: "IELTS Speaking",
     quote: "Speaking simulations on the platform felt like sitting in front of a real examiner. Personal feedback on pronunciation, fluency and vocabulary removed my fear of speaking, and within a few weeks my answers became clearer and more natural.",
-    result: "6.5 to 8.0",
+    result: { from: "6.5", to: "8.0" },
     initials: "MR",
   },
   {
@@ -133,7 +133,7 @@ const reviews: CourseReview[] = [
     name: "Azizbek T.",
     course: "SAT Preparation",
     quote: "The SAT dashboard showed exactly which question types were costing me the most points. Instead of solving random tests, I followed a focused plan for Grammar and Math, reviewed every mistake and entered the exam with a clear strategy.",
-    result: "1210 to 1460",
+    result: { from: "1210", to: "1460" },
     initials: "AT",
   },
   {
@@ -141,7 +141,7 @@ const reviews: CourseReview[] = [
     name: "Shahnoza A.",
     course: "CEFR Multilevel",
     quote: "What I valued most was the balance between clear explanations and practical exercises. After every mock test, my teacher gave specific recommendations, and the platform turned them into daily tasks that steadily moved me from B1 to C1.",
-    result: "B1 to C1",
+    result: { from: "B1", to: "C1" },
     initials: "SA",
   },
   {
@@ -149,7 +149,7 @@ const reviews: CourseReview[] = [
     name: "Javohir S.",
     course: "TOEFL Preparation",
     quote: "The platform made consistent preparation possible even with my busy schedule. Short daily tasks, progress tracking and realistic mock exams kept me motivated, while my mentor helped me fix weaknesses before they became habits.",
-    result: "84 to 112",
+    result: { from: "84", to: "112" },
     initials: "JS",
   },
   {
@@ -157,7 +157,7 @@ const reviews: CourseReview[] = [
     name: "Mohira N.",
     course: "IELTS Intensive",
     quote: "Lessons, homework, teacher feedback and test results are all organized in one place, so I never felt lost during preparation. The clear roadmap helped me study independently while still receiving professional support whenever I needed it.",
-    result: "5.5 to 7.0",
+    result: { from: "5.5", to: "7.0" },
     initials: "MN",
   },
 ];
@@ -170,6 +170,7 @@ const reviewStats = [
 ];
 
 function AnimatedStat({ target, suffix, decimals = 0, startValue = 0, duration = 1600 }: { target: number; suffix: string; decimals?: number; startValue?: number; duration?: number }) {
+  const { language } = useHomeI18n();
   const ref = useRef<HTMLElement>(null);
   const [value, setValue] = useState(startValue);
   const [started, setStarted] = useState(false);
@@ -207,7 +208,7 @@ function AnimatedStat({ target, suffix, decimals = 0, startValue = 0, duration =
 
   const formatted = decimals > 0
     ? value.toFixed(decimals)
-    : Math.round(value).toLocaleString("en-US");
+    : Math.round(value).toLocaleString(language === "uz" ? "uz-UZ" : language === "ru" ? "ru-RU" : "en-US");
 
   return <strong ref={ref}>{formatted}{suffix}</strong>;
 }
@@ -230,7 +231,7 @@ function TeacherCard({ teacher, active, onSelect }: { teacher: Teacher; active: 
       tabIndex={0}
       aria-pressed={active}
     >
-      <div className="teacher-card__premium"><span>◆</span> PREMIUM MENTOR</div>
+      <div className="teacher-card__premium"><span>◆</span> {t("PREMIUM MENTOR")}</div>
       <div className="teacher-card__photo">
         <img
           src={teacher.image}
@@ -252,13 +253,13 @@ function TeacherCard({ teacher, active, onSelect }: { teacher: Teacher; active: 
 
       <div className={`teacher-card__scores teacher-card__scores--${scores.length}`}>
         {scores.map((item) => (
-          <div key={item.label}><span>{item.label}</span><strong>{item.score}</strong></div>
+          <div key={item.label}><span>{t(item.label)}</span><strong>{item.score}</strong></div>
         ))}
       </div>
 
       <div className="teacher-card__summary">
-        <div><span>Overall</span><strong>{teacher.overall}</strong></div>
-        <div><span>Level</span><strong>{teacher.level}</strong></div>
+        <div><span>{t("Overall")}</span><strong>{teacher.overall}</strong></div>
+        <div><span>{t("Level")}</span><strong>{t(teacher.level)}</strong></div>
       </div>
 
       <div className="teacher-card__experience">
@@ -294,7 +295,7 @@ function ReviewCard({ review }: { review: CourseReview }) {
 
       <div className="course-review-card__result">
         <span>{t("Result")}</span>
-        <strong>{review.result}</strong>
+        <strong>{t("{from} to {to}", review.result)}</strong>
       </div>
     </article>
   );
@@ -317,7 +318,7 @@ function TeachersReviewsSection() {
               <span>{t("Our Teachers")}</span>
             </div>
 
-            <div className="teachers-strip" aria-label="Teachers">
+            <div className="teachers-strip" aria-label={t("Teachers carousel")}>
               <div className="teachers-strip__track">
                 {[...teachers, ...teachers].map((teacher, index) => (
                   <TeacherCard
@@ -336,7 +337,7 @@ function TeachersReviewsSection() {
               <div className="course-reviews__intro">
                 <span>{t("Student Reviews")}</span>
                 <h3>{t("What our students say")}</h3>
-                <p>Real results from students who reached their goals with our platform.</p>
+                <p>{t("Real results from students who reached their goals with our platform.")}</p>
                 <div className="course-reviews__stats">
                   {reviewStats.map((stat) => (
                     <div key={stat.label}>
@@ -347,7 +348,7 @@ function TeachersReviewsSection() {
                         startValue={stat.startValue}
                         duration={stat.duration}
                       />
-                      <small>{stat.label}</small>
+                      <small>{t(stat.label)}</small>
                     </div>
                   ))}
                 </div>
@@ -355,7 +356,7 @@ function TeachersReviewsSection() {
 
               <div
                 className="course-reviews__viewport"
-                aria-label="Student reviews"
+                aria-label={t("Student reviews carousel")}
               >
                 <div className="course-reviews__track">
                   {[...reviews, ...reviews].map((review, index) => (

@@ -94,7 +94,7 @@ function HeroSection() {
 
       {/* Cards slider */}
       <div className="hero-v2__cards-wrap">
-        <button className="hero-v2__arrow" onClick={prev} aria-label="Previous">
+        <button className="hero-v2__arrow" onClick={prev} aria-label={t("Previous")}>
           &#8249;
         </button>
 
@@ -108,7 +108,7 @@ function HeroSection() {
           ))}
         </div>
 
-        <button className="hero-v2__arrow" onClick={next} aria-label="Next">
+        <button className="hero-v2__arrow" onClick={next} aria-label={t("Next")}>
           &#8250;
         </button>
       </div>

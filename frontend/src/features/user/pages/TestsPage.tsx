@@ -155,6 +155,8 @@ function TestsPage() {
     () => selectedTest?.modules.find((module) => module.title.toLowerCase() === skill?.toLowerCase()) ?? null,
     [selectedTest, skill],
   );
+  const isMultilevelRoute = testId === "cefr";
+  const isMultilevelTrack = selectedTest?.id === "cefr";
 
   if (!loading && testId && (!selectedTest || (skill && !selectedModule))) {
     return <Navigate replace to="/user/tests" />;
@@ -162,11 +164,13 @@ function TestsPage() {
 
   return (
     <section className="user-page tests-page">
-      <div className="user-page-header">
-        <span>Testlar</span>
-        <h1>Real bazadagi test markazi</h1>
-        <p>Admin panelda yaratilgan testlar shu yerda exam va skill bo‘yicha avtomatik ko‘rinadi.</p>
-      </div>
+      {!isMultilevelRoute && (
+        <div className="user-page-header">
+          <span>Testlar</span>
+          <h1>Real bazadagi test markazi</h1>
+          <p>Admin panelda yaratilgan testlar shu yerda exam va skill bo‘yicha avtomatik ko‘rinadi.</p>
+        </div>
+      )}
 
       {loading && (
         <div className="user-empty-state">
@@ -211,6 +215,44 @@ function TestsPage() {
                 })}
               </div>
             ) : <div className="user-empty-state"><strong>No tests available</strong><span>This skill has no tests yet.</span></div>}
+          </article>
+        ) : isMultilevelTrack ? (
+          <article className="test-detail-panel test-detail-panel--multilevel">
+            <div className="test-detail-panel__header test-detail-panel__header--multilevel">
+              <div>
+                <span>CEFR TESTS</span>
+                <h2>Multilevel</h2>
+              </div>
+              <button type="button" onClick={() => navigate("/user/tests")}>
+                Barcha testlar
+              </button>
+            </div>
+
+            <div className="multilevel-skill-grid">
+              {selectedTest.modules.map((module) => {
+                const hasTests = module.tests.length > 0;
+
+                return (
+                  <article className="multilevel-skill-card" key={module.title}>
+                    <div className="multilevel-skill-card__topline">
+                      <span>{module.title.slice(0, 2)}</span>
+                      <strong>{module.title}</strong>
+                    </div>
+                    <div className="multilevel-skill-card__meta">
+                      <span>{module.count}</span>
+                      <span>{module.duration}</span>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={!hasTests}
+                      onClick={() => hasTests && navigate(`/user/tests/${selectedTest.id}/skill/${module.title.toLowerCase()}`)}
+                    >
+                      {hasTests ? "Testni boshlash" : "Tez kunda"}
+                    </button>
+                  </article>
+                );
+              })}
+            </div>
           </article>
         ) : (
         <article className="test-detail-panel test-detail-panel--standalone test-detail-panel--compact">

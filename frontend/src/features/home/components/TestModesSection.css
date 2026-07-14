@@ -1082,8 +1082,8 @@
 
 .test-mode-card {
   --mode-accent: #7c3aed;
-  height: 430px;
-  min-height: 430px;
+  height: auto;
+  min-height: 450px;
   padding: 16px;
   border: 1.5px solid color-mix(in srgb, var(--mode-accent) 32%, #d7e0ee);
   border-radius: 18px;
@@ -1127,6 +1127,14 @@
 .listening-preview,
 .reading-preview,
 .mock-preview { overflow: hidden; }
+
+/* The listening question can grow when translations or answers wrap. */
+.listening-preview {
+  height: auto;
+  min-height: 285px;
+  align-items: start;
+  overflow: visible;
+}
 
 .listening-preview { grid-template-columns: 76px minmax(0, 1fr); gap: 10px; padding: 11px; }
 .listening-preview__headphones { width: 72px; height: 96px; margin-top: 36px; transform: scale(.72); transform-origin: top left; }

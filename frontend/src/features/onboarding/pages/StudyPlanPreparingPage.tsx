@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 import {
@@ -9,15 +9,46 @@ import "../styles/onboarding.css";
 
 function StudyPlanPreparingPage() {
   const navigate = useNavigate();
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
+    const currentUrl = window.location.href;
+    window.history.pushState({ preparing: true }, "", currentUrl);
+
+    const preventBackNavigation = () => {
+      window.history.pushState({ preparing: true }, "", currentUrl);
+    };
+
+    window.addEventListener("popstate", preventBackNavigation);
+    return () => window.removeEventListener("popstate", preventBackNavigation);
+  }, []);
+
+  useEffect(() => {
+    const duration = 20_000;
+    const startedAt = performance.now();
+    let frameId = 0;
+
+    function updateProgress(now: number) {
+      const nextProgress = Math.min(100, Math.round(((now - startedAt) / duration) * 100));
+      setProgress(nextProgress);
+
+      if (nextProgress < 100) {
+        frameId = window.requestAnimationFrame(updateProgress);
+      }
+    }
+
+    frameId = window.requestAnimationFrame(updateProgress);
+    const redirectTimerId = window.setTimeout(() => {
+      setProgress(100);
       const redirectTarget = getOnboardingRedirectTarget();
       clearOnboardingRedirectTarget();
       navigate(redirectTarget, { replace: true });
-    }, 2600);
+    }, duration);
 
-    return () => window.clearTimeout(timeoutId);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(redirectTimerId);
+    };
   }, [navigate]);
 
   return (
@@ -28,21 +59,19 @@ function StudyPlanPreparingPage() {
           <strong>LevelUp</strong>
         </div>
 
-        <div className="study-plan-preparing__loader" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
+        <div className="study-plan-preparing__content" aria-live="polite">
+          <span className="study-plan-preparing__eyebrow">Personalized plan</span>
+          <p className="study-plan-preparing__status">Loading</p>
+          <strong className="study-plan-preparing__percentage">{progress}%</strong>
 
-        <span className="study-plan-preparing__eyebrow">Shaxsiy reja</span>
-        <h1>Siz uchun belgilangan muddatda o‘quv dasturi taxlanyapti</h1>
-        <p>
-          Javoblaringiz tahlil qilinmoqda. Maqsadingiz, darajangiz va kunlik
-          vaqtingizga mos o‘quv yo‘nalishi tayyorlanadi.
-        </p>
+          <div className="study-plan-preparing__progress" aria-label={`${progress}% complete`}>
+            <span style={{ width: `${progress}%` }} />
+          </div>
 
-        <div className="study-plan-preparing__progress">
-          <span />
+          <h1>Building your study plan</h1>
+          <p className="study-plan-preparing__description">
+            We’re matching your goal, current level, and daily availability.
+          </p>
         </div>
       </section>
     </main>

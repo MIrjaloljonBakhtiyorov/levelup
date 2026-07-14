@@ -68,7 +68,7 @@ function PartnerCard({ partner }: { partner: PartnerItem }) {
       </span>
 
       <span className="partner-card__content">
-        <small className="partner-card__badge">Trusted partner</small>
+        <small className="partner-card__badge">{t("Trusted partner")}</small>
         <strong>{t(partner.name)}</strong>
         <small>{t(partner.description)}</small>
       </span>
@@ -94,7 +94,7 @@ function PartnersSection() {
           </p>
         </header>
 
-        <div className="partners-section__marquee" aria-label="Partners">
+        <div className="partners-section__marquee" aria-label={t("Partners")}>
           <div className="partners-section__track">
             {[...partners, ...partners].map((partner, index) => (
               <PartnerCard
