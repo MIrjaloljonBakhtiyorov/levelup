@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
-import { NavLink, useLocation } from "react-router";
+import { useEffect, useRef, useState } from "react";
+import { NavLink } from "react-router";
 
 import { userMenu } from "../constants/userMenu";
 
@@ -102,22 +102,37 @@ function MenuIcon({ icon }: { icon: string }) {
 }
 
 function UserSidebar({ isOpen, onClose }: UserSidebarProps) {
-  const location = useLocation();
-  const initiallyOpenGroups = useMemo(
-    () =>
-      userMenu
-        .filter((item) => item.children && location.pathname.startsWith(item.path))
-        .map((item) => item.path),
-    [location.pathname],
-  );
-  const [openGroups, setOpenGroups] = useState<string[]>(initiallyOpenGroups);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const [openGroups, setOpenGroups] = useState<string[]>([]);
 
   useEffect(() => {
-    setOpenGroups((currentGroups) => [
-      ...currentGroups,
-      ...initiallyOpenGroups.filter((groupPath) => !currentGroups.includes(groupPath)),
-    ]);
-  }, [initiallyOpenGroups]);
+    function closeFlyoutsWhenOutside(target: EventTarget | null) {
+      if (target instanceof Node && !sidebarRef.current?.contains(target)) {
+        setOpenGroups([]);
+      }
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      closeFlyoutsWhenOutside(event.target);
+    }
+
+    function handleFocusIn(event: FocusEvent) {
+      closeFlyoutsWhenOutside(event.target);
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpenGroups([]);
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   function toggleGroup(path: string) {
     setOpenGroups((currentGroups) =>
@@ -129,7 +144,7 @@ function UserSidebar({ isOpen, onClose }: UserSidebarProps) {
 
   return (
     <>
-      <aside className={`user-sidebar ${isOpen ? "user-sidebar--open" : ""}`}>
+      <aside ref={sidebarRef} className={`user-sidebar ${isOpen ? "user-sidebar--open" : ""}`}>
         <NavLink className="user-brand" to="/user/dashboard" onClick={onClose}>
           <span>LU</span>
           <div>
@@ -149,7 +164,7 @@ function UserSidebar({ isOpen, onClose }: UserSidebarProps) {
                   <NavLink
                     className={({ isActive }) => `user-menu__link ${isActive ? "is-active" : ""}`}
                     to={item.path}
-                    onClick={onClose}
+                    onClick={() => { setOpenGroups([]); onClose(); }}
                   >
                     <span className="user-menu__icon">
                       <MenuIcon icon={item.icon} />
@@ -173,7 +188,12 @@ function UserSidebar({ isOpen, onClose }: UserSidebarProps) {
                 {item.children && (
                   <div className={`user-menu__children ${isOpen ? "user-menu__children--open" : ""}`}>
                     {item.children.map((child) => (
-                      <NavLink to={child.path} key={child.path} onClick={onClose}>
+                      <NavLink
+                        to={child.path}
+                        key={child.path}
+                        className={child.color ? `user-menu__child--${child.color}` : undefined}
+                        onClick={() => { setOpenGroups([]); onClose(); }}
+                      >
                         {child.label}
                       </NavLink>
                     ))}

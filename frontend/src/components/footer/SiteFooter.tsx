@@ -1,29 +1,52 @@
 import { Link } from "react-router";
 
+import { useHomeI18n } from "../../features/home/i18n/HomeI18n";
 import "./SiteFooter.css";
 
 const footerGroups = [
   {
-    title: "Platforma",
-    links: ["Testlar", "Kurslar", "Ustozlar", "Natijalar paneli"],
+    title: "Platform",
+    links: [
+      { label: "Tests", to: "/user/tests" },
+      { label: "Courses", to: "/user/courses" },
+      { label: "Teachers", to: "/#teachers" },
+      { label: "Results Dashboard", to: "/user/results" },
+    ],
   },
   {
-    title: "Tayyorlov",
-    links: ["Tinglash", "O‘qish", "Yozish", "Gapirish"],
+    title: "Preparation",
+    links: [
+      { label: "Listening", to: "/user/tests" },
+      { label: "Reading", to: "/user/tests" },
+      { label: "Writing", to: "/user/tests" },
+      { label: "Speaking", to: "/user/tests" },
+    ],
   },
   {
-    title: "Resurslar",
-    links: ["Maqolalar", "Materiallar", "Mock test", "Savol-javob"],
+    title: "Resources",
+    links: [
+      { label: "Articles", to: "/user/resources" },
+      { label: "Materials", to: "/#free-lessons" },
+      { label: "Mock Test", to: "/user/tests" },
+      { label: "FAQ", to: "/#partners" },
+    ],
   },
   {
-    title: "Kompaniya",
-    links: ["Biz haqimizda", "Aloqa", "Shartlar", "Maxfiylik"],
+    title: "Company",
+    links: [
+      { label: "About Us", to: "/#partners" },
+      { label: "Contact", to: "/#footer" },
+      { label: "Terms", to: "/" },
+      { label: "Privacy", to: "/" },
+    ],
   },
 ];
 
 function SiteFooter() {
+  const { t } = useHomeI18n();
+
   return (
-    <footer className="site-footer">
+    <footer className="site-footer" id="footer">
       <div className="site-footer__container">
         <div className="site-footer__top">
           <div className="site-footer__brand-block">
@@ -38,9 +61,13 @@ function SiteFooter() {
             </Link>
 
             <p>
-              IELTS va Multilevel imtihonlariga tayyorlanish uchun test,
-              mentorlik va progress tahlil platformasi.
+              {t("A platform for test preparation, mentoring, and progress tracking for IELTS and Multilevel exams.")}
             </p>
+
+            <div className="site-footer__cta">
+              <span>Start your English journey</span>
+              <Link to="/register">Create free account <b>→</b></Link>
+            </div>
 
             <div className="site-footer__socials">
               <a href="/" aria-label="Telegram">
@@ -58,28 +85,17 @@ function SiteFooter() {
           <div className="site-footer__links">
             {footerGroups.map((group) => (
               <div className="site-footer__group" key={group.title}>
-                <h3>{group.title}</h3>
+                <h3>{t(group.title)}</h3>
 
-                <nav aria-label={group.title}>
+                <nav aria-label={t(group.title)}>
                   {group.links.map((link) => (
-                    <Link key={link} to="/">
-                      {link}
+                    <Link key={link.label} to={link.to}>
+                      {t(link.label)}
                     </Link>
                   ))}
                 </nav>
               </div>
             ))}
-          </div>
-        </div>
-
-        <div className="site-footer__bottom">
-          <p>© 2026 EduSkill. Barcha huquqlar himoyalangan.</p>
-
-          <div className="site-footer__payments" aria-label="To‘lov usullari">
-            <span>UZCARD</span>
-            <span>HUMO</span>
-            <span>VISA</span>
-            <span>MASTERCARD</span>
           </div>
         </div>
       </div>

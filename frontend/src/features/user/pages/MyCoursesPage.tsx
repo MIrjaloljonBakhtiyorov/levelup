@@ -1,124 +1,90 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 
-import { CourseCard, type CourseCardData } from "../components/UserUI";
+import { getUserToken } from "../../auth/services/userSession";
+import { CourseCard, EmptyState, type CourseCardData } from "../components/UserUI";
+import { getStartedCourses, startCourse } from "../services/userCoursesApi";
+import { mapCourseToCourseCard } from "../utils/courseCards";
 
 type CourseFilter = CourseCardData["status"] | "all";
 
 const courseFilters: { id: CourseFilter; label: string }[] = [
   { id: "all", label: "Barchasi" },
-  { id: "studying", label: "O‘qiyotgan kurslarim" },
+  { id: "studying", label: "O'qiyotgan kurslarim" },
   { id: "purchased", label: "Sotib olingan" },
   { id: "free", label: "Bepul kurslar" },
   { id: "upcoming", label: "Boshlanishi kutilayotgan" },
-  { id: "live", label: "Bo‘layotgan kurslar" },
+  { id: "live", label: "Bo'layotgan kurslar" },
   { id: "completed", label: "Yakunlangan" },
 ];
 
-const courses: CourseCardData[] = [
-  {
-    title: "IELTS Intensive 7.5",
-    skill: "Writing + Speaking",
-    progress: 58,
-    score: "7.0",
-    nextLesson: "Opinion essay structure",
-    teacher: "MU",
-    teacherName: "Madina Umarova",
-    certificate: "IELTS sertifikati",
-    type: "Sotib olingan",
-    status: "studying",
-    statusLabel: "O‘qiyapman",
-    tone: "blue",
-  },
-  {
-    title: "CEFR B2 Mastery",
-    skill: "Listening",
-    progress: 74,
-    score: "B2",
-    nextLesson: "Long conversation",
-    teacher: "DS",
-    teacherName: "Dilshod Sobirov",
-    certificate: "CEFR sertifikati",
-    type: "Sotib olingan",
-    status: "purchased",
-    statusLabel: "Sotib olingan",
-    tone: "green",
-  },
-  {
-    title: "TOEFL Academic Pack",
-    skill: "Reading",
-    progress: 36,
-    score: "91",
-    nextLesson: "Inference questions",
-    teacher: "JM",
-    teacherName: "Jasur Mirzayev",
-    certificate: "TOEFL sertifikati",
-    type: "Premium",
-    status: "live",
-    statusLabel: "Bo‘layapti",
-    tone: "purple",
-  },
-  {
-    title: "SAT Reading Sprint",
-    skill: "Reading and Writing",
-    progress: 82,
-    score: "680",
-    nextLesson: "Command of evidence",
-    teacher: "AK",
-    teacherName: "Aziza Karimova",
-    certificate: "SAT certificate",
-    type: "Yaqin start",
-    status: "upcoming",
-    statusLabel: "Kutilmoqda",
-    tone: "orange",
-  },
-  {
-    title: "Grammar Foundation",
-    skill: "Grammar",
-    progress: 18,
-    score: "A2-B1",
-    nextLesson: "Tenses overview",
-    teacher: "NX",
-    teacherName: "Nodira Xolmatova",
-    certificate: "Ishtirok sertifikati",
-    type: "Bepul",
-    status: "free",
-    statusLabel: "Bepul",
-    tone: "pink",
-  },
-  {
-    title: "Speaking Confidence",
-    skill: "Speaking",
-    progress: 100,
-    score: "6.5",
-    nextLesson: "Kurs yakunlangan",
-    teacher: "FR",
-    teacherName: "Farrux Rahimov",
-    certificate: "Completion certificate",
-    type: "Yakunlangan",
-    status: "completed",
-    statusLabel: "Yakunlangan",
-    tone: "blue",
-  },
-];
-
 function MyCoursesPage() {
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<CourseFilter>("all");
+  const [courses, setCourses] = useState<CourseCardData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const token = getUserToken();
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    setLoading(true);
+    getStartedCourses(token)
+      .then((result) => {
+        setCourses((result.courses ?? []).map(mapCourseToCourseCard));
+        setMessage("");
+      })
+      .catch((error: unknown) => {
+        setMessage(error instanceof Error ? error.message : "Kurslarimni yuklab bo'lmadi");
+      })
+      .finally(() => setLoading(false));
+  }, [navigate]);
+
   const filteredCourses = useMemo(
     () =>
       activeFilter === "all"
         ? courses
         : courses.filter((course) => course.status === activeFilter),
-    [activeFilter],
+    [activeFilter, courses],
   );
+
+  async function handleContinue(course: CourseCardData) {
+    const token = getUserToken();
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const result = await startCourse(token, course.id);
+      setCourses((current) => {
+        const nextCourse = mapCourseToCourseCard(result.course);
+        return [
+          nextCourse,
+          ...current.filter((item) => item.id !== nextCourse.id),
+        ];
+      });
+      setMessage("");
+      navigate(`/user/courses/${course.id}/learn`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Kursni davom ettirib bo'lmadi");
+    }
+  }
 
   return (
     <section className="user-page">
       <div className="user-page-header">
         <span>Kurslarim</span>
-        <h1>Davom etayotgan va sotib olingan kurslar</h1>
+        <h1>Boshlangan kurslar ro'yxati</h1>
         <p>
-          O‘qiyotgan, sotib olingan, bepul, bo‘layotgan va yakunlangan
-          kurslaringizni filter orqali boshqaring.
+          Bepul darslarda yoki boshqa kurs sahifalarida Boshlash tugmasini
+          bosgan kurslaringiz shu yerda saqlanadi.
         </p>
       </div>
 
@@ -135,9 +101,26 @@ function MyCoursesPage() {
         ))}
       </div>
 
-      <div className="user-card-grid">
-        {filteredCourses.map((course) => <CourseCard course={course} key={course.title} />)}
-      </div>
+      {message && <p className="user-alert">{message}</p>}
+
+      {loading ? (
+        <EmptyState title="Kurslar yuklanmoqda" text="Backend bazadan boshlagan kurslaringiz olinmoqda." />
+      ) : filteredCourses.length > 0 ? (
+        <div className="user-card-grid my-course-grid">
+          {filteredCourses.map((course) => (
+            <CourseCard
+              course={course}
+              key={course.id}
+              onAction={handleContinue}
+            />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          title="Hozircha boshlangan kurs yo'q"
+          text="Bepul darslardan birini boshlang, keyin u Kurslarim ro'yxatida ko'rinadi."
+        />
+      )}
     </section>
   );
 }

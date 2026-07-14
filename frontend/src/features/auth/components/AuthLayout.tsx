@@ -18,33 +18,32 @@ function AuthLayout() {
 
         <div className="auth-showcase__content">
           <span className="auth-showcase__badge">
-            AI yordamidagi o‘quv platforma
+            AI-powered learning platform
           </span>
 
           <h1>
-            Maqsad ballingizga
-            <span> aqlli reja bilan yeting</span>
+            Reach your target score
+            <span> with a smarter plan</span>
           </h1>
 
           <p>
-            IELTS va Multilevel testlari, shaxsiy o‘quv rejalari va
-            tajribali ustozlar bitta qulay platformada.
+            IELTS and Multilevel tests, personalized study plans, and expert mentors in one platform.
           </p>
 
           <div className="auth-benefits">
             <div className="auth-benefit">
               <span>✓</span>
-              <p>Shaxsiy o‘quv reja</p>
+              <p>Personalized study plan</p>
             </div>
 
             <div className="auth-benefit">
               <span>✓</span>
-              <p>Real imtihon formatidagi mashq testlari</p>
+              <p>Real exam-style practice tests</p>
             </div>
 
             <div className="auth-benefit">
               <span>✓</span>
-              <p>Aqlli natija tahlili</p>
+              <p>Smart performance analytics</p>
             </div>
           </div>
         </div>
@@ -54,7 +53,7 @@ function AuthLayout() {
         <div className="auth-decoration auth-decoration--three" />
 
         <p className="auth-showcase__footer">
-          © 2026 LevelUp. Barcha huquqlar himoyalangan.
+          © 2026 LevelUp. All rights reserved.
         </p>
       </section>
 

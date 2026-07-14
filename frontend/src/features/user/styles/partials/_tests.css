@@ -256,6 +256,87 @@
   margin: 0;
 }
 
+/* Compact selected-track view */
+.test-detail-panel--compact {
+  gap: 12px;
+  min-height: 0;
+  padding: 16px;
+  border-radius: 20px;
+}
+
+.test-detail-panel--compact .test-detail-panel__header {
+  align-items: center;
+  padding-bottom: 10px;
+}
+
+.test-detail-panel--compact .test-detail-panel__header h2 {
+  margin-top: 3px;
+  font-size: 22px;
+}
+
+.test-detail-panel--compact .test-detail-panel__header p {
+  margin-top: 4px;
+}
+
+.test-detail-panel--compact .test-module-card {
+  gap: 9px;
+  padding: 12px;
+  border-radius: 15px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.test-detail-panel--compact .test-module-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.test-detail-panel--compact .test-module-card > div:first-child span {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.test-detail-panel--compact .test-module-card p {
+  min-height: 0;
+  font-size: 14px;
+}
+
+.test-detail-panel--compact .test-module-card dl {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.test-detail-panel--compact .test-module-card dl div {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px;
+  padding: 5px 6px;
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.test-detail-panel--compact .test-module-card dt,
+.test-detail-panel--compact .test-module-card dd {
+  min-width: 0;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+.test-detail-panel--compact .test-module-card dt {
+  font-size: 9px;
+  line-height: 1.15;
+}
+
+.test-detail-panel--compact .test-module-card dd {
+  font-size: 10px;
+  line-height: 1.15;
+  text-align: left;
+}
+
+.test-detail-panel--compact .test-module-card button {
+  min-height: 36px;
+}
+
 .test-module-card dt {
   color: var(--user-muted);
   font-size: 12px;

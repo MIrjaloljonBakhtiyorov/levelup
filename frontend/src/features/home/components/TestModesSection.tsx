@@ -1,54 +1,15 @@
 import "./TestModesSection.css";
+import { useNavigate } from "react-router";
+import { useHomeI18n } from "../i18n/HomeI18n";
 
 const waveformBars = [
   10, 17, 25, 15, 34, 23, 40, 18, 30, 45, 22, 37, 16, 28, 43, 21, 35,
   14, 25, 39, 18, 31, 23, 42, 17, 29, 38, 20,
 ];
 
-const freeTests = [
-  {
-    name: "Multilevel",
-    code: "CEFR",
-    description: "A2 dan C1 gacha darajani aniqlash uchun bepul sinov.",
-    duration: "90 daq",
-    questions: "60 savol",
-    accent: "green",
-  },
-  {
-    name: "IELTS",
-    code: "IELTS",
-    description: "Listening, Reading, Writing va Speaking formatidagi testlar.",
-    duration: "2:45 soat",
-    questions: "4 bo‘lim",
-    accent: "blue",
-  },
-  {
-    name: "TOEFL",
-    code: "TOEFL",
-    description: "Akademik ingliz tili uchun internet-based test namunasi.",
-    duration: "2 soat",
-    questions: "4 bo‘lim",
-    accent: "purple",
-  },
-  {
-    name: "SAT",
-    code: "SAT",
-    description: "Reading, Writing va Math bo‘yicha diagnostik topshiriqlar.",
-    duration: "75 daq",
-    questions: "45 savol",
-    accent: "orange",
-  },
-  {
-    name: "Duolingo",
-    code: "DET",
-    description: "Tezkor adaptiv test va interaktiv speaking-writing mashqlari.",
-    duration: "45 daq",
-    questions: "Adaptiv",
-    accent: "lime",
-  },
-];
-
 function ListeningCard() {
+  const { t } = useHomeI18n();
+
   return (
     <article className="test-mode-card test-mode-card--listening">
       <header className="test-mode-card__header">
@@ -57,17 +18,38 @@ function ListeningCard() {
             1
           </span>
 
-          <h2>IELTS Tinglash</h2>
+          <h2>{t("IELTS Listening")}</h2>
         </div>
 
-        <span className="test-mode-card__badge">Audio</span>
+        <span className="test-mode-card__badge">{t("Audio")}</span>
       </header>
 
       <div className="listening-preview">
         <div className="listening-preview__headphones" aria-hidden="true">
-          <span className="listening-preview__headband" />
-          <span className="listening-preview__ear listening-preview__ear--left" />
-          <span className="listening-preview__ear listening-preview__ear--right" />
+          <svg viewBox="0 0 120 132" role="presentation">
+            <defs>
+              <linearGradient id="headphone-band" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#a78bfa" />
+                <stop offset="1" stopColor="#5b35d5" />
+              </linearGradient>
+              <linearGradient id="headphone-cup" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#8b7cf0" />
+                <stop offset="0.58" stopColor="#654bd4" />
+                <stop offset="1" stopColor="#382694" />
+              </linearGradient>
+              <filter id="headphone-shadow" x="-30%" y="-30%" width="160%" height="180%">
+                <feDropShadow dx="0" dy="8" stdDeviation="7" floodColor="#4633a8" floodOpacity=".25" />
+              </filter>
+            </defs>
+            <path className="headphone-svg__band" d="M21 71V55C21 27 37 11 60 11s39 16 39 44v16" />
+            <path className="headphone-svg__band-shine" d="M29 56c0-23 12-36 31-36 13 0 23 7 28 19" />
+            <g filter="url(#headphone-shadow)">
+              <path className="headphone-svg__cup" d="M15 64c0-8 5-13 12-12l10 2c6 1 9 6 8 12l-6 43c-1 7-6 11-12 10l-10-2c-7-1-10-6-9-13l7-40Z" />
+              <path className="headphone-svg__cup" d="M105 64c0-8-5-13-12-12l-10 2c-6 1-9 6-8 12l6 43c1 7 6 11 12 10l10-2c7-1 10-6 9-13l-7-40Z" />
+              <path className="headphone-svg__cushion" d="M20 67 14 103c-1 5 1 8 6 9" />
+              <path className="headphone-svg__cushion" d="m100 67 6 36c1 5-1 8-6 9" />
+            </g>
+          </svg>
         </div>
 
         <div className="listening-preview__content">
@@ -84,20 +66,20 @@ function ListeningCard() {
             <span>00:42</span>
 
             <div className="listening-preview__controls">
-              <button type="button" aria-label="Oldingi audio">
-                ‹
+              <button type="button" aria-label="Previous audio">
+                &#8249;
               </button>
 
               <button
                 className="listening-preview__play"
                 type="button"
-                aria-label="Audioni ijro etish"
+                aria-label="Play audio"
               >
-                ▶
+                &#9654;
               </button>
 
-              <button type="button" aria-label="Keyingi audio">
-                ›
+              <button type="button" aria-label="Next audio">
+                &#8250;
               </button>
             </div>
 
@@ -105,18 +87,18 @@ function ListeningCard() {
           </div>
 
           <div className="listening-question">
-            <span>12-savol / 40</span>
+            <span>{t("Question 37 / 40")}</span>
 
-            <p>Suhbatning asosiy maqsadi nimadan iborat?</p>
+            <p>{t("What does the speaker say about the new language course?")}</p>
 
             <label>
               <input type="radio" name="demo-listening" />
-              <span>Band qilish</span>
+              <span>{t("A. It is suitable for beginners only.")}</span>
             </label>
 
             <label>
               <input type="radio" name="demo-listening" />
-              <span>Yo‘nalish so‘rash</span>
+              <span>{t("B. It includes both lessons and practice tests.")}</span>
             </label>
 
             <label className="listening-question__selected">
@@ -125,20 +107,22 @@ function ListeningCard() {
                 name="demo-listening"
                 defaultChecked
               />
-              <span>Mavjud xizmatlarni taqqoslash</span>
+              <span>{t("C. It requires previous exam experience.")}</span>
             </label>
           </div>
         </div>
       </div>
 
       <button className="test-mode-card__button test-mode-card__button--purple">
-        Tinglash testini boshlash
+        {t("Start Listening Test")}
       </button>
     </article>
   );
 }
 
 function ReadingCard() {
+  const { t } = useHomeI18n();
+
   return (
     <article className="test-mode-card test-mode-card--reading">
       <header className="test-mode-card__header">
@@ -147,11 +131,11 @@ function ReadingCard() {
             2
           </span>
 
-          <h2>IELTS O‘qish</h2>
+          <h2>{t("IELTS Reading")}</h2>
         </div>
 
         <span className="test-mode-card__time">
-          <span aria-hidden="true">◷</span>
+          <span aria-hidden="true">&#9711;</span>
           60:00
         </span>
       </header>
@@ -162,11 +146,10 @@ function ReadingCard() {
           <span className="reading-document__sheet reading-document__sheet--middle" />
 
           <div className="reading-document__sheet reading-document__sheet--front">
-            <strong>Urban transport kelajagi</strong>
+            <strong>{t("The Future of Urban Transport")}</strong>
 
             <p>
-              Shaharlar barqaror va ishonchli transport tizimlari orqali
-              harakatlanish madaniyatini qayta qurmoqda.
+              {t("Cities are transforming the way people travel by developing cleaner, smarter, and more reliable transport systems.")}
             </p>
 
             <span className="reading-document__line reading-document__line--long" />
@@ -175,19 +158,19 @@ function ReadingCard() {
           </div>
         </div>
 
-        <div className="reading-pagination" aria-label="O‘qish sahifalari">
-          <button type="button">11</button>
+        <div className="reading-pagination" aria-label="Reading pages">
+          <button type="button">19</button>
           <button className="reading-pagination__active" type="button">
-            12
+            20
           </button>
-          <button type="button">13</button>
-          <button type="button">14</button>
+          <button type="button">21</button>
+          <button type="button">22</button>
         </div>
       </div>
 
       <button className="test-mode-card__button test-mode-card__button--blue">
         <a href="" className="test-mode-card__link">
-          O‘qish testini boshlash
+          {t("Start Reading Test")}
         </a>
       </button>
     </article>
@@ -195,22 +178,23 @@ function ReadingCard() {
 }
 
 function MockTestCard() {
+  const { t } = useHomeI18n();
   const sections = [
     {
-      name: "Tinglash",
-      duration: "30 daq",
+      name: "Listening",
+      duration: "30 minutes",
     },
     {
-      name: "O‘qish",
-      duration: "60 daq",
+      name: "Reading",
+      duration: "60 minutes",
     },
     {
-      name: "Yozish",
-      duration: "60 daq",
+      name: "Writing",
+      duration: "60 minutes",
     },
     {
-      name: "Gapirish",
-      duration: "11–14 daq",
+      name: "Speaking",
+      duration: "11–14 minutes",
     },
   ];
 
@@ -222,11 +206,11 @@ function MockTestCard() {
             3
           </span>
 
-          <h2>Full Mock imtihon</h2>
+          <h2>{t("Full Mock Exam")}</h2>
         </div>
 
         <span className="test-mode-card__time">
-          <span aria-hidden="true">◷</span>
+          <span aria-hidden="true">&#9711;</span>
           2:54:00
         </span>
       </header>
@@ -235,23 +219,22 @@ function MockTestCard() {
         <div className="mock-preview__details">
           <div className="mock-date">
             <span className="mock-date__icon" aria-hidden="true">
-              ▣
+              &#9635;
             </span>
 
             <div>
-              <strong>18-may, 2026</strong>
-              <p>Yakshanba · 06:00</p>
+              <strong>{t("All mock tests reviewed by a professional teacher.")}</strong>
             </div>
           </div>
 
           <div className="mock-sections">
             {sections.map((section) => (
               <div className="mock-section" key={section.name}>
-                <span>{section.name}</span>
+                <span>{t(section.name)}</span>
 
                 <div>
-                  <small>{section.duration}</small>
-                  <strong aria-label="Tayyor">✓</strong>
+                  <small>{t(section.duration)}</small>
+                  <strong aria-label="Ready">&#10003;</strong>
                 </div>
               </div>
             ))}
@@ -261,50 +244,100 @@ function MockTestCard() {
         <div className="mock-score">
           <div className="mock-score__ring">
             <div>
-              <span>Taxminiy band</span>
-              <strong>7.0</strong>
+              <span>{t("Estimated band")}</span>
+              <strong>8.0</strong>
             </div>
           </div>
         </div>
       </div>
 
       <button className="test-mode-card__button test-mode-card__button--green">
-        To‘liq mock testni boshlash
+        {t("Start Free Mock Test")}
       </button>
     </article>
   );
 }
 
-function FreeTestCard({ test }: { test: (typeof freeTests)[number] }) {
+const examPrograms = [
+  {
+    code: "CEFR",
+    title: "CEFR Multilevel Exam",
+    description: "Determine your English level from A2 to C1 with a complete four-skill assessment.",
+    duration: "2 h 45 min",
+    questions: "4 skills",
+    score: "A2–C1",
+    sections: ["Listening", "Reading", "Writing", "Speaking"],
+    accent: "cefr",
+  },
+  {
+    code: "SAT",
+    title: "Digital SAT Exam",
+    description: "Practice the adaptive Digital SAT format with academic reading, writing, and math tasks.",
+    duration: "2 h 14 min",
+    questions: "98 questions",
+    score: "1600",
+    sections: ["Reading & Writing", "Math", "Module 1", "Module 2"],
+    accent: "sat",
+  },
+  {
+    code: "TOEFL",
+    title: "TOEFL iBT Exam",
+    description: "Build the academic English skills required for the complete TOEFL internet-based test.",
+    duration: "2 hours",
+    questions: "4 sections",
+    score: "120",
+    sections: ["Reading", "Listening", "Speaking", "Writing"],
+    accent: "toefl",
+  },
+] as const;
+
+function ExamProgramCard({ exam }: { exam: (typeof examPrograms)[number] }) {
+  const { t } = useHomeI18n();
+  const navigate = useNavigate();
+
   return (
-    <article className={`free-test-card free-test-card--${test.accent}`}>
-      <div className="free-test-card__top">
-        <span className="free-test-card__code">{test.code}</span>
-        <span className="free-test-card__label">Bepul</span>
+    <article className={`exam-program-card exam-program-card--${exam.accent}`}>
+      <header className="exam-program-card__header">
+        <span className="exam-program-card__code">{exam.code}</span>
+        <span className="exam-program-card__duration">{exam.duration}</span>
+      </header>
+
+      <h3>{t(exam.title)}</h3>
+      <p>{t(exam.description)}</p>
+
+      <div className="exam-program-card__visual">
+        <div className="exam-program-card__score">
+          <small>{t("Max score")}</small>
+          <strong>{exam.score}</strong>
+        </div>
+        <div className="exam-program-card__sections">
+          {exam.sections.map((section, index) => (
+            <span key={section}>
+              <i>{index + 1}</i>
+              {t(section)}
+            </span>
+          ))}
+        </div>
       </div>
 
-      <h3>{test.name}</h3>
-      <p>{test.description}</p>
-
-      <div className="free-test-card__meta">
-        <span>{test.duration}</span>
-        <span>{test.questions}</span>
-      </div>
-
-      <button type="button">Testni boshlash</button>
+      <footer className="exam-program-card__footer">
+        <span>{exam.questions}</span>
+        <button type="button" onClick={() => navigate("/login")}>{t("Start Exam")}</button>
+      </footer>
     </article>
   );
 }
 
 function TestModesSection() {
+  const { t } = useHomeI18n();
+
   return (
     <section className="test-modes-section" id="tests">
       <div className="test-modes-section__heading">
-        <span>Imtihonga tayyorgarlikni real testlar bilan boshlang</span>
-        <h2>Asosiy test rejimlari</h2>
+        <span>{t("PREPARE WITH REAL EXAM-STYLE TESTS")}</span>
+        <h2>{t("Main Test Modes")}</h2>
         <p>
-          Tinglash, o‘qish va to‘liq mock imtihonlar orqali darajangizni
-          aniq baholang va keyingi qadamni ishonch bilan tanlang.
+          {t("Assess your level through Listening, Reading, and full mock exams, identify your weak areas, and move to the next stage with a clear study plan.")}
         </p>
       </div>
 
@@ -314,22 +347,14 @@ function TestModesSection() {
         <MockTestCard />
       </div>
 
-      <div className="free-tests">
-        <div className="free-tests__heading">
-          <span>Free tests</span>
-          <h2>Bepul imtihon sinovlari</h2>
-          <p>
-            Multilevel, IELTS, TOEFL, SAT va Duolingo bo‘yicha boshlang‘ich
-            diagnostik testlarni bepul sinab ko‘ring.
-          </p>
-        </div>
-
-        <div className="free-tests__grid">
-          {freeTests.map((test) => (
-            <FreeTestCard key={test.name} test={test} />
+      <div className="exam-programs">
+        <div className="exam-programs__grid">
+          {examPrograms.map((exam) => (
+            <ExamProgramCard exam={exam} key={exam.code} />
           ))}
         </div>
       </div>
+
     </section>
   );
 }

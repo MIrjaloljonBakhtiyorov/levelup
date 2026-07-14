@@ -23,13 +23,31 @@ type UserLoginResponse = {
   user: AdminUser;
 };
 
+function getDeviceId() {
+  const storageKey = "levelup_device_id";
+  let deviceId = localStorage.getItem(storageKey);
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem(storageKey, deviceId);
+  }
+  return deviceId;
+}
+
 export function loginAdmin(data: LoginFormData) {
   return apiRequest<LoginResponse>("/auth/login", {
     method: "POST",
+    headers: { "X-Device-ID": getDeviceId() },
     body: JSON.stringify({
       login: data.login,
       password: data.password,
     }),
+  });
+}
+
+export function logoutAdmin(token: string) {
+  return apiRequest<{ success: true; message: string }>("/auth/logout", {
+    method: "POST",
+    token,
   });
 }
 

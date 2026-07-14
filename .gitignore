@@ -36,6 +36,10 @@ Thumbs.db
 
 # Local data / temporary database
 backend/data/users.json
+backend/data/admin_logs.json
+backend/data/security.json
+backend/data/lesson_notes.json
+backend/data/user_courses.json
 
 # TypeScript cache
 *.tsbuildinfo

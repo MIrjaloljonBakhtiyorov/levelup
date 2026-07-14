@@ -1,7 +1,9 @@
+import type { ReactNode } from "react";
+
 type AdminSectionTitleProps = {
   title: string;
   description: string;
-  meta: string;
+  meta: ReactNode;
 };
 
 function AdminSectionTitle({ title, description, meta }: AdminSectionTitleProps) {

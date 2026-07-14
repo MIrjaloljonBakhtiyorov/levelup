@@ -45,28 +45,24 @@ function RegisterPage() {
       clearAdminToken();
       setUserSession(result.token, result.user);
       setOnboardingRedirectTarget("/user/dashboard");
-    } catch (error) {
-      setFormMessage(
-        error instanceof Error
-          ? error.message
-          : "Ro‘yxatdan o‘tishda xatolik yuz berdi",
-      );
+    } catch {
+      setFormMessage("Unable to create your account. The email may already be in use.");
       return;
     }
 
-    setFormMessage("Ro‘yxatdan o‘tildi. Endi o‘quv rejangizni sozlaymiz.");
+    setFormMessage("Account created. Let’s set up your study plan.");
     window.setTimeout(() => navigate("/onboarding"), 700);
   }
 
   return (
     <div className="auth-form">
       <div className="auth-form__header">
-        <span className="auth-form__eyebrow">Bepul boshlang</span>
+        <span className="auth-form__eyebrow">Start for free</span>
 
-        <h2>Hisob yarating</h2>
+        <h2>Create your account</h2>
 
         <p>
-          Shaxsiy o‘quv rejangizni olish uchun ro‘yxatdan o‘ting.
+          Sign up to receive your personalized study plan.
         </p>
       </div>
 
@@ -78,12 +74,12 @@ function RegisterPage() {
         {formMessage && <p className="auth-alert auth-alert--success">{formMessage}</p>}
 
         <div className="auth-field">
-          <label htmlFor="register-first-name">Ism</label>
+          <label htmlFor="register-first-name">First name</label>
 
           <input
             id="register-first-name"
             type="text"
-            placeholder="Ismingiz"
+            placeholder="Your first name"
             autoComplete="given-name"
             aria-invalid={Boolean(errors.firstName)}
             {...register("firstName")}
@@ -97,12 +93,12 @@ function RegisterPage() {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="register-last-name">Familiya</label>
+          <label htmlFor="register-last-name">Last name</label>
 
           <input
             id="register-last-name"
             type="text"
-            placeholder="Familiyangiz"
+            placeholder="Your last name"
             autoComplete="family-name"
             aria-invalid={Boolean(errors.lastName)}
             {...register("lastName")}
@@ -116,12 +112,12 @@ function RegisterPage() {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="register-middle-name">Sharifi</label>
+          <label htmlFor="register-middle-name">Middle name</label>
 
           <input
             id="register-middle-name"
             type="text"
-            placeholder="Otangiz ismi"
+            placeholder="Your middle name (optional)"
             autoComplete="additional-name"
             aria-invalid={Boolean(errors.middleName)}
             {...register("middleName")}
@@ -135,7 +131,7 @@ function RegisterPage() {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="register-phone">Telefon raqam</label>
+          <label htmlFor="register-phone">Phone number</label>
 
           <input
             id="register-phone"
@@ -154,7 +150,7 @@ function RegisterPage() {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="register-email">Email manzil</label>
+          <label htmlFor="register-email">Email address</label>
 
           <input
             id="register-email"
@@ -173,13 +169,13 @@ function RegisterPage() {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="register-password">Parol</label>
+          <label htmlFor="register-password">Password</label>
 
           <div className="auth-password">
             <input
               id="register-password"
               type={showPassword ? "text" : "password"}
-              placeholder="Kamida 8 ta belgi"
+              placeholder="At least 8 characters"
               autoComplete="new-password"
               aria-invalid={Boolean(errors.password)}
               {...register("password")}
@@ -189,7 +185,7 @@ function RegisterPage() {
               type="button"
               onClick={() => setShowPassword((current) => !current)}
             >
-              {showPassword ? "Yashirish" : "Ko‘rsatish"}
+              {showPassword ? "Hide" : "Show"}
             </button>
           </div>
 
@@ -202,13 +198,13 @@ function RegisterPage() {
 
         <div className="auth-field">
           <label htmlFor="register-confirm-password">
-            Parolni tasdiqlang
+            Confirm password
           </label>
 
           <input
             id="register-confirm-password"
             type={showPassword ? "text" : "password"}
-            placeholder="Parolni qayta kiriting"
+            placeholder="Enter your password again"
             autoComplete="new-password"
             aria-invalid={Boolean(errors.confirmPassword)}
             {...register("confirmPassword")}
@@ -226,8 +222,8 @@ function RegisterPage() {
             <input type="checkbox" {...register("acceptTerms")} />
 
             <span>
-              <Link to="/terms">Foydalanish shartlari</Link> va{" "}
-              <Link to="/privacy">maxfiylik siyosati</Link>ga roziman.
+              I agree to the <Link to="/terms">Terms of Use</Link> and{" "}
+              <Link to="/privacy">Privacy Policy</Link>.
             </span>
           </label>
 
@@ -243,17 +239,17 @@ function RegisterPage() {
           type="submit"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Yaratilmoqda..." : "Hisob yaratish"}
+          {isSubmitting ? "Creating account..." : "Create account"}
         </button>
       </form>
 
       <p className="auth-form__switch">
-        Hisobingiz bormi?
-        <Link to="/login"> Kirish</Link>
+        Already have an account?
+        <Link to="/login"> Sign in</Link>
       </p>
 
       <Link className="auth-back-link" to="/">
-        ← Bosh sahifaga qaytish
+        ← Back to home
       </Link>
     </div>
   );

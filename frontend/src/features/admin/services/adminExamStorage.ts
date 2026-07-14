@@ -18,4 +18,5 @@ export function loadStoredExamTests() {
 
 export function saveStoredExamTests(tests: ExamTest[]) {
   localStorage.setItem(ADMIN_EXAM_TESTS_KEY, JSON.stringify(tests));
+  window.dispatchEvent(new Event("admin-data-changed"));
 }

@@ -2,9 +2,11 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router";
 
+import { useHomeI18n, type HomeLanguage } from "../i18n/HomeI18n";
 import "./FinalCtaSection.css";
 
 function FinalCtaSection() {
+  const { language, setLanguage, t } = useHomeI18n();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
@@ -14,11 +16,11 @@ function FinalCtaSection() {
     const normalizedEmail = email.trim();
 
     if (!normalizedEmail || !normalizedEmail.includes("@")) {
-      setMessage("To‘g‘ri email manzilini kiriting.");
+      setMessage(t("Enter a valid email address."));
       return;
     }
 
-    setMessage("Obuna muvaffaqiyatli qabul qilindi.");
+    setMessage(t("Subscription received successfully."));
     setEmail("");
   }
 
@@ -29,26 +31,25 @@ function FinalCtaSection() {
       <div className="final-cta__container">
         <div className="final-cta__content">
           <span className="final-cta__eyebrow">
-            Bepul diagnostik test
+            {t("Free diagnostic test")}
           </span>
 
           <h2>
-            Maqsad ballingiz
-            <span> siz o‘ylagandan yaqinroq</span>
+            {t("Your target score")}
+            <span>{t(" is closer than you think")}</span>
           </h2>
 
           <p>
-            Bepul diagnostik testdan o‘ting va siz uchun mos
-            individual tayyorgarlik rejasini oling.
+            {t("Take a free diagnostic test and get an individual preparation plan that fits you.")}
           </p>
 
           <Link className="final-cta__button" to="/tests">
-            Bepul testni boshlash
+            {t("Start free test")}
           </Link>
 
           <div className="final-cta__security">
             <span aria-hidden="true">♙</span>
-            <span>Karta ma’lumotlari talab qilinmaydi</span>
+            <span>{t("No card details required")}</span>
           </div>
         </div>
 
@@ -69,9 +70,9 @@ function FinalCtaSection() {
           </div>
 
           <div className="cta-score-card">
-            <span>Your Goal</span>
+            <span>{t("Your Goal")}</span>
             <strong>7.5</strong>
-            <small>You can do it!</small>
+            <small>{t("You can do it!")}</small>
           </div>
 
           <div className="cta-books">
@@ -96,10 +97,10 @@ function FinalCtaSection() {
         <div className="final-cta__subscribe">
           <div>
             <span className="final-cta__subscribe-label">
-              Yangiliklar va foydali maslahatlar
+              {t("News and useful tips")}
             </span>
 
-            <h3>Ta’lim yangiliklarini o‘tkazib yubormang</h3>
+            <h3>{t("Do not miss education updates")}</h3>
           </div>
 
           <form
@@ -108,7 +109,7 @@ function FinalCtaSection() {
             noValidate
           >
             <label htmlFor="newsletter-email">
-              Email manzilingiz
+              {t("Your email address")}
             </label>
 
             <div className="final-cta__form-row">
@@ -124,7 +125,7 @@ function FinalCtaSection() {
                 }}
               />
 
-              <button type="submit">Obuna bo‘lish</button>
+              <button type="submit">{t("Subscribe")}</button>
             </div>
 
             {message && (
@@ -133,9 +134,9 @@ function FinalCtaSection() {
           </form>
 
           <label className="final-cta__language">
-            <span>Til</span>
+            <span>{t("Language")}</span>
 
-            <select defaultValue="uz">
+            <select value={language} onChange={(event) => setLanguage(event.target.value as HomeLanguage)}>
               <option value="uz">🇺🇿 O‘zbekcha</option>
               <option value="en">🇬🇧 English</option>
               <option value="ru">🇷🇺 Русский</option>

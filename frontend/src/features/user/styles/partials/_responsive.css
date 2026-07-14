@@ -236,6 +236,28 @@
     gap: 8px;
   }
 
+  .user-language-switcher__trigger {
+    min-width: 124px;
+    grid-template-columns: minmax(58px, 1fr) 26px 12px;
+    padding-inline: 10px 8px;
+  }
+
+  .user-language-switcher__trigger i {
+    width: 26px;
+    height: 26px;
+  }
+
+  .user-language-switcher__menu {
+    left: 0;
+    right: auto;
+    width: 174px;
+  }
+
+  .user-language-switcher__menu::before {
+    left: 22px;
+    right: auto;
+  }
+
   .user-plan-badge,
   .user-upgrade-btn {
     display: none;

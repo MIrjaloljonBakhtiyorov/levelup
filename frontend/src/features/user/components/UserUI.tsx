@@ -4,12 +4,14 @@ export type Tone = "blue" | "purple" | "green" | "orange" | "pink" | "red";
 
 type ButtonProps = {
   children: ReactNode;
+  disabled?: boolean;
+  onClick?: () => void;
   variant?: "primary" | "secondary" | "ghost";
 };
 
-export function Button({ children, variant = "primary" }: ButtonProps) {
+export function Button({ children, disabled = false, onClick, variant = "primary" }: ButtonProps) {
   return (
-    <button className={`user-btn user-btn--${variant}`} type="button">
+    <button className={`user-btn user-btn--${variant}`} disabled={disabled} onClick={onClick} type="button">
       {children}
     </button>
   );
@@ -81,59 +83,92 @@ export function ProgressCard({
 }
 
 export type LessonCardData = {
+  id: string;
   category: string;
   title: string;
+  description: string;
   duration: string;
   level: string;
   mentor: string;
+  mentorPhotoUrl?: string;
   progress: number;
   tone: Tone;
   accent?: string;
+  actionLabel?: string;
 };
 
-export function LessonCard({ lesson }: { lesson: LessonCardData }) {
+export function LessonCard({
+  lesson,
+  onStart,
+}: {
+  lesson: LessonCardData;
+  onStart?: (lesson: LessonCardData) => void;
+}) {
+  const initials = lesson.mentor
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "LU";
+
   return (
     <article className="user-card lesson-card">
       <div className={`lesson-card__cover lesson-card__cover--${lesson.tone}`}>
-        <div>
+        <div className="lesson-card__cover-main">
           <Badge tone={lesson.tone}>{lesson.category}</Badge>
           <strong>{lesson.accent ?? lesson.category.slice(0, 2)}</strong>
         </div>
-        <span>{lesson.progress}%</span>
+        <span className="lesson-card__progress-ring">{lesson.progress}%</span>
       </div>
 
       <div className="lesson-card__body">
         <h3>{lesson.title}</h3>
-        <p>{lesson.level} daraja uchun {lesson.duration}</p>
+        <p>{lesson.description}</p>
       </div>
 
       <div className="lesson-card__meta">
-        <span>{lesson.level}</span>
-        <span>{lesson.duration}</span>
-        <span>{lesson.mentor}</span>
+        <span><i aria-hidden="true">◆</i>{lesson.level}</span>
+        <span><i aria-hidden="true">▶</i>{lesson.duration}</span>
+        <span><i aria-hidden="true">★</i>{lesson.category}</span>
       </div>
 
       <div className="lesson-card__footer">
-        <div>
+        <div className="lesson-card__mentor">
+          {lesson.mentorPhotoUrl ? (
+            <img src={lesson.mentorPhotoUrl} alt={lesson.mentor} />
+          ) : (
+            <span className="user-avatar user-avatar--small">{initials}</span>
+          )}
+          <div>
+            <span>Mentor</span>
+            <strong>{lesson.mentor}</strong>
+          </div>
+        </div>
+        <div className="lesson-card__progress-copy">
           <span>Progress</span>
           <strong>{lesson.progress}%</strong>
         </div>
-        <Button variant="secondary">Boshlash</Button>
       </div>
 
       <ProgressBar value={lesson.progress} tone={lesson.tone} />
+      <Button variant="secondary" onClick={() => onStart?.(lesson)}>
+        {lesson.actionLabel ?? "Boshlash"}
+      </Button>
     </article>
   );
 }
 
 export type CourseCardData = {
+  id: string;
   title: string;
+  description: string;
   skill: string;
   progress: number;
   score: string;
   nextLesson: string;
   teacher: string;
   teacherName: string;
+  teacherPhotoUrl?: string;
   certificate: string;
   type: string;
   status: "studying" | "purchased" | "free" | "upcoming" | "live" | "completed";
@@ -141,7 +176,13 @@ export type CourseCardData = {
   tone: Tone;
 };
 
-export function CourseCard({ course }: { course: CourseCardData }) {
+export function CourseCard({
+  course,
+  onAction,
+}: {
+  course: CourseCardData;
+  onAction?: (course: CourseCardData) => void;
+}) {
   return (
     <article className="user-card course-card">
       <div className={`course-card__cover course-card__cover--${course.tone}`}>
@@ -149,25 +190,38 @@ export function CourseCard({ course }: { course: CourseCardData }) {
           <span>{course.skill}</span>
           <small>{course.type}</small>
         </div>
-        <strong>{course.progress}%</strong>
+        <strong>{course.skill.slice(0, 2).toUpperCase()}</strong>
       </div>
       <div className="course-card__body">
         <h3>{course.title}</h3>
-        <p>Keyingi dars: {course.nextLesson}</p>
+        <p>{course.description}</p>
       </div>
       <div className="course-card__details">
-        <span>Sertifikat: <strong>{course.certificate}</strong></span>
-        <span>Ball: <strong>{course.score}</strong></span>
+        <span><i aria-hidden="true">◆</i>{course.score}</span>
+        <span><i aria-hidden="true">▶</i>{course.nextLesson}</span>
       </div>
-      <div className="user-card__meta">
+      <div className="course-card__footer">
         <div className="course-card__teacher">
-          <span className="user-avatar user-avatar--small">{course.teacher}</span>
-          <strong>{course.teacherName}</strong>
+          {course.teacherPhotoUrl ? (
+            <img src={course.teacherPhotoUrl} alt={course.teacherName} />
+          ) : (
+            <span className="user-avatar user-avatar--small">{course.teacher}</span>
+          )}
+          <div>
+            <span>Mentor</span>
+            <strong>{course.teacherName}</strong>
+          </div>
         </div>
         <Badge tone={course.tone}>{course.statusLabel}</Badge>
       </div>
+      <div className="course-card__progress-row">
+        <span>Progress</span>
+        <strong>{course.progress}%</strong>
+      </div>
       <ProgressBar value={course.progress} tone={course.tone} />
-      <Button>{course.status === "completed" ? "Ko‘rish" : "Davom ettirish"}</Button>
+      <Button onClick={() => onAction?.(course)}>
+        {course.status === "completed" ? "Ko'rish" : "Davom ettirish"}
+      </Button>
     </article>
   );
 }

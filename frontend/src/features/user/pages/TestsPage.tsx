@@ -1,7 +1,9 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router";
 
 import type { Tone } from "../components/UserUI";
+import { getUserTests, type UserTestSummary } from "../services/testsApi";
+import { loadTestResults, resultColor } from "../services/testResultsStorage";
 
 type TestModule = {
   title: string;
@@ -9,6 +11,7 @@ type TestModule = {
   duration: string;
   lastResult: string;
   focus: string;
+  tests: UserTestSummary[];
 };
 
 type ExamTest = {
@@ -23,97 +26,137 @@ type ExamTest = {
   modules: TestModule[];
 };
 
-const tests: ExamTest[] = [
-  {
-    id: "ielts",
-    title: "IELTS",
-    shortLabel: "IE",
-    skills: ["Listening", "Reading", "Writing", "Speaking"],
-    count: "48 test",
-    duration: "2 soat 45 daqiqa",
-    result: "Oxirgi: 6.0",
-    tone: "blue",
-    modules: [
-      { title: "Listening", count: "12 test", duration: "30 daqiqa", lastResult: "Oxirgi: 6.5", focus: "Section 1-4, note completion, map labelling" },
-      { title: "Reading", count: "14 test", duration: "60 daqiqa", lastResult: "Oxirgi: 6.0", focus: "True/False/Not Given, matching headings" },
-      { title: "Writing", count: "10 task", duration: "60 daqiqa", lastResult: "Oxirgi: 6.0", focus: "Task 1 report, Task 2 essay feedback" },
-      { title: "Speaking", count: "12 practice", duration: "15 daqiqa", lastResult: "Oxirgi: 6.5", focus: "Part 1, cue card, follow-up questions" },
-    ],
-  },
-  {
-    id: "cefr",
-    title: "CEFR",
-    shortLabel: "CE",
-    skills: ["Listening", "Reading", "Writing", "Speaking"],
-    count: "36 test",
-    duration: "2 soat",
-    result: "Oxirgi: B2",
-    tone: "green",
-    modules: [
-      { title: "Listening", count: "9 test", duration: "25 daqiqa", lastResult: "Oxirgi: B2", focus: "Dialog, monolog va asosiy fikrni topish" },
-      { title: "Reading", count: "10 test", duration: "45 daqiqa", lastResult: "Oxirgi: B2", focus: "Matn tahlili, gap joylashtirish, inference" },
-      { title: "Writing", count: "8 task", duration: "35 daqiqa", lastResult: "Oxirgi: B2", focus: "Email, essay va grammar accuracy" },
-      { title: "Speaking", count: "9 practice", duration: "15 daqiqa", lastResult: "Oxirgi: B2+", focus: "Interview, picture description, discussion" },
-    ],
-  },
-  {
-    id: "toefl",
-    title: "TOEFL",
-    shortLabel: "TO",
-    skills: ["Reading", "Listening", "Speaking", "Writing"],
-    count: "24 test",
-    duration: "3 soat",
-    result: "Oxirgi: 86",
-    tone: "purple",
-    modules: [
-      { title: "Reading", count: "6 test", duration: "54 daqiqa", lastResult: "Oxirgi: 22", focus: "Academic passage, vocabulary, inference" },
-      { title: "Listening", count: "6 test", duration: "41 daqiqa", lastResult: "Oxirgi: 21", focus: "Lecture, conversation, detail questions" },
-      { title: "Speaking", count: "6 practice", duration: "17 daqiqa", lastResult: "Oxirgi: 20", focus: "Independent and integrated responses" },
-      { title: "Writing", count: "6 task", duration: "50 daqiqa", lastResult: "Oxirgi: 23", focus: "Integrated writing and academic discussion" },
-    ],
-  },
-  {
-    id: "sat",
-    title: "SAT",
-    shortLabel: "SA",
-    skills: ["Reading and Writing", "Math"],
-    count: "30 test",
-    duration: "2 soat 14 daqiqa",
-    result: "Oxirgi: 1240",
-    tone: "orange",
-    modules: [
-      { title: "Reading", count: "10 set", duration: "32 daqiqa", lastResult: "Oxirgi: 610", focus: "Evidence, main idea, vocabulary in context" },
-      { title: "Writing", count: "8 set", duration: "32 daqiqa", lastResult: "Oxirgi: 630", focus: "Grammar, transitions, rhetorical synthesis" },
-      { title: "Math", count: "12 set", duration: "70 daqiqa", lastResult: "Oxirgi: 610", focus: "Algebra, problem solving, advanced math" },
-    ],
-  },
-  {
-    id: "mock",
-    title: "Mock testlar",
-    shortLabel: "Mo",
-    skills: ["Full exam", "AI feedback"],
-    count: "12 mock",
-    duration: "Real format",
-    result: "Oxirgi: +0.4",
-    tone: "pink",
-    modules: [
-      { title: "Full mock", count: "5 mock", duration: "To‘liq imtihon", lastResult: "Oxirgi: +0.4", focus: "Real vaqt, barcha bo‘limlar, yakuniy tahlil" },
-      { title: "Listening", count: "2 mock", duration: "30-40 daqiqa", lastResult: "Oxirgi: yaxshi", focus: "Audio format va javob varaqasi bilan" },
-      { title: "Reading", count: "2 mock", duration: "60 daqiqa", lastResult: "Oxirgi: barqaror", focus: "Matn tezligi va savol turlari tahlili" },
-      { title: "Writing", count: "3 mock", duration: "60 daqiqa", lastResult: "AI feedback", focus: "Band descriptor bo‘yicha avtomatik izoh" },
-    ],
-  },
-];
+const groupTone: Record<string, Tone> = {
+  ielts: "blue",
+  cefr: "green",
+  toefl: "purple",
+  sat: "orange",
+  general: "pink",
+};
+
+const groupTitles: Record<string, string> = {
+  ielts: "IELTS",
+  cefr: "CEFR",
+  toefl: "TOEFL",
+  sat: "SAT",
+  general: "Umumiy testlar",
+};
+
+const skillFocus: Record<string, string> = {
+  Listening: "Audio-based listening practice and comprehension tests.",
+  Reading: "Text analysis, matching, gap-fill, and reading practice tests.",
+  Writing: "Writing tasks, essays, and guided writing practice.",
+  Speaking: "Speaking prompts, image/table practice, and interview exercises.",
+  Vocabulary: "Vocabulary, collocation, and academic-word quizzes.",
+  Grammar: "Grammar, tense, sentence-structure, and accuracy quizzes.",
+  Game: "Gamified quizzes, speed challenges, and interactive practice.",
+};
+
+const EXAM_SKILLS = ["Listening", "Reading", "Writing", "Speaking"];
+
+function buildGroups(tests: UserTestSummary[]): ExamTest[] {
+  const grouped = new Map<string, UserTestSummary[]>();
+
+  tests.forEach((test) => {
+    const key = (test.examType || "General").toLowerCase();
+    grouped.set(key, [...(grouped.get(key) ?? []), test]);
+  });
+
+  return Array.from(grouped.entries()).map(([id, items]) => {
+    const bySkill = new Map<string, UserTestSummary[]>();
+    items.forEach((test) => {
+      bySkill.set(test.skill, [...(bySkill.get(test.skill) ?? []), test]);
+    });
+
+    const moduleSkills = ["cefr", "ielts"].includes(id)
+      ? EXAM_SKILLS
+      : Array.from(bySkill.keys());
+
+    const modules = moduleSkills.map((skill) => {
+      const skillTests = bySkill.get(skill) ?? [];
+      const questionCount = skillTests.reduce((sum, test) => sum + (test.questionCount || 0), 0);
+      return {
+        title: skill,
+        count: `${skillTests.length} ${skillTests.length === 1 ? "test" : "tests"}`,
+        duration: questionCount > 0 ? `${questionCount} questions` : "Practice",
+        lastResult: "Yangi",
+        focus: skillFocus[skill] ?? "Admin panelda yaratilgan real testlar.",
+        tests: skillTests,
+      };
+    });
+
+    const skills = modules.map((module) => module.title);
+
+    return {
+      id,
+      title: groupTitles[id] ?? items[0]?.examType ?? "Tests",
+      shortLabel: (groupTitles[id] ?? id).slice(0, 2).toUpperCase(),
+      skills,
+      count: `${items.length} test`,
+      duration: `${modules.length} sections`,
+      result: "Test library",
+      tone: groupTone[id] ?? "blue",
+      modules,
+    };
+  });
+}
 
 function TestsPage() {
   const navigate = useNavigate();
-  const { testId } = useParams<{ testId?: string }>();
+  const { testId, skill } = useParams<{ testId?: string; skill?: string }>();
+  const [tests, setTests] = useState<UserTestSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [comingSoonSkill, setComingSoonSkill] = useState("");
+  const results = useMemo(() => loadTestResults(), []);
+
+  useEffect(() => {
+    let alive = true;
+
+    const loadTests = (showLoader = false) => {
+      if (showLoader) setLoading(true);
+      setMessage("");
+
+      getUserTests()
+        .then((result) => {
+          if (alive) setTests(result.tests);
+        })
+        .catch((error) => {
+          if (alive) setMessage(error instanceof Error ? error.message : "Testlarni yuklab bo'lmadi");
+        })
+        .finally(() => {
+          if (alive && showLoader) setLoading(false);
+        });
+    };
+
+    const reloadWhenVisible = () => {
+      if (document.visibilityState === "visible") loadTests();
+    };
+
+    loadTests(true);
+    window.addEventListener("focus", reloadWhenVisible);
+    document.addEventListener("visibilitychange", reloadWhenVisible);
+    const refreshInterval = window.setInterval(loadTests, 30_000);
+
+    return () => {
+      alive = false;
+      window.removeEventListener("focus", reloadWhenVisible);
+      document.removeEventListener("visibilitychange", reloadWhenVisible);
+      window.clearInterval(refreshInterval);
+    };
+  }, []);
+
+  const testGroups = useMemo(() => buildGroups(tests), [tests]);
   const selectedTest = useMemo(
-    () => tests.find((test) => test.id === testId) ?? null,
-    [testId],
+    () => testGroups.find((test) => test.id === testId) ?? null,
+    [testGroups, testId],
+  );
+  const selectedModule = useMemo(
+    () => selectedTest?.modules.find((module) => module.title.toLowerCase() === skill?.toLowerCase()) ?? null,
+    [selectedTest, skill],
   );
 
-  if (testId && !selectedTest) {
+  if (!loading && testId && (!selectedTest || (skill && !selectedModule))) {
     return <Navigate replace to="/user/tests" />;
   }
 
@@ -121,17 +164,61 @@ function TestsPage() {
     <section className="user-page tests-page">
       <div className="user-page-header">
         <span>Testlar</span>
-        <h1>Imtihon modeli asosidagi test markazi</h1>
-        <p>IELTS, CEFR, TOEFL, SAT va full mock testlarni real formatga yaqin muhitda ishlang.</p>
+        <h1>Real bazadagi test markazi</h1>
+        <p>Admin panelda yaratilgan testlar shu yerda exam va skill bo‘yicha avtomatik ko‘rinadi.</p>
       </div>
 
-      {selectedTest ? (
-        <article className="test-detail-panel test-detail-panel--standalone">
+      {loading && (
+        <div className="user-empty-state">
+          <strong>Testlar yuklanmoqda...</strong>
+          <span>Backend bazadan real testlar olinmoqda.</span>
+        </div>
+      )}
+
+      {!loading && message && (
+        <div className="user-empty-state">
+          <strong>Testlar yuklanmadi</strong>
+          <span>{message}</span>
+        </div>
+      )}
+
+      {!loading && !message && selectedTest ? (
+        skill && selectedModule ? (
+          <article className="test-detail-panel test-detail-panel--standalone test-detail-panel--compact">
+            <div className="test-detail-panel__header">
+              <div>
+                <span>Test selection</span>
+                <h2>{selectedTest.title} · {selectedModule.title}</h2>
+                <p>{selectedModule.duration} across {selectedModule.count}.</p>
+              </div>
+              <button type="button" onClick={() => navigate(`/user/tests/${selectedTest.id}`)}>Back to skills</button>
+            </div>
+            {selectedModule.tests.length > 0 ? (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px" }}>
+                {selectedModule.tests.map((test, index) => {
+                  const result = results.find((item) => item.testId === test.id);
+                  const colors = result ? resultColor(result.wrong) : { background: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" };
+                  return (
+                    <article key={test.id} style={{ display: "grid", gap: "9px", padding: "15px", border: `1px solid ${colors.border}`, borderRadius: "14px", background: colors.background }}>
+                      <strong style={{ color: colors.color, fontSize: "16px" }}>Test {index + 1}</strong>
+                      <span style={{ color: "#475569", fontSize: "13px" }}>{test.questionCount} questions · {test.level || "All levels"}</span>
+                      {result && <small style={{ color: colors.color, fontWeight: 900 }}>{result.correct}/{result.total} correct · {result.wrong} mistakes</small>}
+                      <button type="button" onClick={() => navigate(`/user/tests/take/${test.id}`)} style={{ minHeight: "36px", border: 0, borderRadius: "9px", background: "#2563eb", color: "#fff", cursor: "pointer", font: "inherit", fontWeight: 900 }}>
+                        {result ? "View result" : "Start test"}
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : <div className="user-empty-state"><strong>No tests available</strong><span>This skill has no tests yet.</span></div>}
+          </article>
+        ) : (
+        <article className="test-detail-panel test-detail-panel--standalone test-detail-panel--compact">
           <div className="test-detail-panel__header">
             <div>
               <span>Tanlangan yo‘nalish</span>
-              <h2>{selectedTest.title} bo‘limlari</h2>
-              <p>{selectedTest.skills.join(" · ")} bo‘yicha alohida practice va natija tahlili.</p>
+              <h2>{selectedTest.title} sections</h2>
+              <p>Choose a skill to access its available tests.</p>
             </div>
             <button type="button" onClick={() => navigate("/user/tests")}>
               Test tanlashga qaytish
@@ -147,32 +234,96 @@ function TestsPage() {
                 </div>
                 <p>{module.focus}</p>
                 <dl>
-                  <div><dt>Testlar</dt><dd>{module.count}</dd></div>
-                  <div><dt>Vaqt</dt><dd>{module.duration}</dd></div>
-                  <div><dt>Natija</dt><dd>{module.lastResult}</dd></div>
+                  <div><dt>Tests</dt><dd>{module.count}</dd></div>
+                  <div><dt>Questions</dt><dd>{module.duration}</dd></div>
+                  <div><dt>Status</dt><dd>{module.lastResult}</dd></div>
                 </dl>
-                <button type="button">Bo‘limni boshlash</button>
+                {module.tests.length === 0 && (
+                  <p style={{ minHeight: "auto", margin: 0, fontSize: "13px" }}>No tests have been added yet.</p>
+                )}
+                {(module.tests.length > 0 || ["Writing", "Speaking"].includes(module.title)) && (
+                  <button type="button" onClick={() => {
+                    if (["Writing", "Speaking"].includes(module.title)) {
+                      setComingSoonSkill(module.title);
+                      return;
+                    }
+                    navigate(`/user/tests/${selectedTest.id}/skill/${module.title.toLowerCase()}`);
+                  }} style={{ minHeight: "36px", border: "1px solid #bfdbfe", borderRadius: "9px", background: "#eff6ff", color: "#1d4ed8", cursor: "pointer", font: "inherit", fontWeight: 900 }}>
+                    {module.tests.length > 0 ? "Start" : "Coming soon"}
+                  </button>
+                )}
+                {comingSoonSkill === module.title && (
+                  <p style={{ minHeight: "auto", margin: 0, padding: "9px", borderRadius: "9px", background: "#fef3c7", color: "#92400e", fontSize: "12px", fontWeight: 800 }}>
+                    This section will be added by our developers in the coming days.
+                  </p>
+                )}
               </div>
             ))}
           </div>
         </article>
-      ) : (
+        )
+      ) : null}
+
+      {!loading && !message && !selectedTest && testGroups.length > 0 && (
         <div className="test-select-grid">
-          {tests.map((test) => (
-            <article className="test-select-card" key={test.id}>
+          {testGroups.map((test) => (
+            <article
+              className="test-select-card"
+              key={test.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate(`/user/tests/${test.id}`)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") navigate(`/user/tests/${test.id}`);
+              }}
+              style={{ cursor: "pointer" }}
+            >
               <div className={`test-select-card__icon test-select-card__icon--${test.tone}`}>{test.shortLabel}</div>
               <h3>{test.title}</h3>
               <p>{test.skills.join(" · ")}</p>
-              <div className="test-select-card__stats">
-                <span>{test.count}</span>
-                <span>{test.duration}</span>
-                <span>{test.result}</span>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: "10px", margin: "18px 0 14px" }}>
+                {Array.from({ length: 7 }, (_, index) => {
+                  const item = test.modules.flatMap((module) => module.tests)[index];
+                  const result = item ? results.find((saved) => saved.testId === item.id) : undefined;
+                  const colors = result
+                    ? resultColor(result.wrong)
+                    : item
+                      ? { background: index === 0 ? "#eff6ff" : "#f8fbff", color: "#1d4ed8", border: index === 0 ? "#93c5fd" : "#dbeafe" }
+                      : { background: "#f1f5f9", color: "#94a3b8", border: "#e2e8f0" };
+                  return (
+                    <button
+                      key={item?.id ?? `empty-${index}`}
+                      type="button"
+                      disabled={!item}
+                      title={item ? (result ? `${result.correct}/${result.total} correct · ${result.wrong} mistakes` : item.testName) : "Test is not available yet"}
+                      onClick={(event) => { event.stopPropagation(); if (item) navigate(`/user/tests/take/${item.id}`); }}
+                      style={{
+                        width: "100%",
+                        minHeight: "42px",
+                        padding: "0 6px",
+                        border: `1px solid ${colors.border}`,
+                        borderRadius: "10px",
+                        background: colors.background,
+                        color: colors.color,
+                        cursor: item ? "pointer" : "not-allowed",
+                        fontWeight: 900,
+                        opacity: item ? 1 : 0.72,
+                      }}
+                    >
+                      Test {index + 1}
+                    </button>
+                  );
+                })}
               </div>
-              <button type="button" onClick={() => navigate(`/user/tests/${test.id}`)}>
-                Tanlash
-              </button>
             </article>
           ))}
+        </div>
+      )}
+
+      {!loading && !message && testGroups.length === 0 && (
+        <div className="user-empty-state">
+          <strong>Hozircha test yo'q</strong>
+          <span>Admin panelda test yaratilgandan keyin ular shu yerda ko‘rinadi.</span>
         </div>
       )}
     </section>

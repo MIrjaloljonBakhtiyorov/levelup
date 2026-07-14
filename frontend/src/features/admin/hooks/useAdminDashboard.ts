@@ -1,13 +1,19 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
+import { isUnauthorizedError } from "../../../services/apiClient";
 import { clearAdminToken, getAdminToken } from "../../auth/services/adminSession";
 import { examSkills } from "../constants/adminNavigation";
 import {
   loadStoredExamTests,
   saveStoredExamTests,
 } from "../services/adminExamStorage";
-import { getAdminUsers, updateAdminUserStatus } from "../services/adminUsersApi";
+import {
+  deleteAdminUser,
+  getAdminUsers,
+  updateAdminUser,
+  updateAdminUserStatus,
+} from "../services/adminUsersApi";
 import type { AdminUser, ExamSkill, ExamTest, UserStatus } from "../types/adminTypes";
 import { createId } from "../utils/adminFormatters";
 
@@ -24,12 +30,7 @@ export function useAdminDashboard() {
   const stats = useMemo(() => {
     const active = users.filter((user) => user.status === "active").length;
     const blocked = users.length - active;
-
-    return {
-      total: users.length,
-      active,
-      inactive: blocked,
-    };
+    return { total: users.length, active, inactive: blocked };
   }, [users]);
 
   const testCountsBySkill = useMemo(
@@ -57,14 +58,13 @@ export function useAdminDashboard() {
 
     getAdminUsers(token)
       .then((result) => setUsers(result.users || []))
-      .catch((error: Error) => {
-        if (error.message.includes("Admin sifatida")) {
+      .catch((error: unknown) => {
+        if (isUnauthorizedError(error)) {
           clearAdminToken();
           navigate("/login");
           return;
         }
-
-        setMessage("Foydalanuvchilar ro‘yxatini yuklab bo‘lmadi");
+        setMessage("Foydalanuvchilar ro'yxatini yuklab bo'lmadi");
       });
   }, [navigate, token]);
 
@@ -73,21 +73,42 @@ export function useAdminDashboard() {
   }, [tests]);
 
   async function updateStatus(userId: string, status: UserStatus, blockedUntil?: string) {
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
+    if (!token) { navigate("/login"); return; }
     try {
       await updateAdminUserStatus(token, userId, status, blockedUntil);
-      setUsers((currentUsers) =>
-        currentUsers.map((user) =>
-          user.id === userId ? { ...user, blockedUntil, status } : user,
-        ),
+      setUsers((cur) =>
+        cur.map((u) => (u.id === userId ? { ...u, blockedUntil, status } : u)),
       );
       setMessage("");
     } catch {
-      setMessage("Statusni o‘zgartirib bo‘lmadi");
+      setMessage("Statusni o'zgartirib bo'lmadi");
+    }
+  }
+
+  async function editUser(
+    userId: string,
+    data: { firstName: string; lastName: string; middleName: string; phoneNumber: string; email: string },
+  ) {
+    if (!token) { navigate("/login"); return; }
+    try {
+      const result = await updateAdminUser(token, userId, data);
+      setUsers((cur) => cur.map((u) => (u.id === userId ? result.user : u)));
+      setMessage("");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Ma'lumotlarni saqlashda xatolik";
+      setMessage(msg);
+      throw new Error(msg);
+    }
+  }
+
+  async function removeUser(userId: string) {
+    if (!token) { navigate("/login"); return; }
+    try {
+      await deleteAdminUser(token, userId);
+      setUsers((cur) => cur.filter((u) => u.id !== userId));
+      setMessage("");
+    } catch {
+      setMessage("Foydalanuvchini o'chirib bo'lmadi");
     }
   }
 
@@ -99,7 +120,7 @@ export function useAdminDashboard() {
   function selectSkill(skill: ExamSkill) {
     setSelectedSkill(skill);
     setMessage("");
-    setFormKey((currentKey) => currentKey + 1);
+    setFormKey((k) => k + 1);
     window.history.replaceState(null, "", `#Multilevel-${skill}`);
   }
 
@@ -116,6 +137,7 @@ export function useAdminDashboard() {
 
     const newTest: ExamTest = {
       id: createId(),
+      examType: "CEFR",
       skill: selectedSkill,
       testName: String(formData.get("testName") || "").trim(),
       testNumber: String(formData.get("testNumber") || "").trim(),
@@ -126,21 +148,23 @@ export function useAdminDashboard() {
     };
 
     if (!newTest.testName || !newTest.testNumber || !newTest.level) {
-      setMessage("Test nomi, raqami va levelni to‘liq kiriting");
+      setMessage("Test nomi, raqami va levelni to'liq kiriting");
       return;
     }
 
-    setTests((currentTests) => [newTest, ...currentTests]);
+    setTests((cur) => [newTest, ...cur]);
     setMessage("");
     event.currentTarget.reset();
-    setFormKey((currentKey) => currentKey + 1);
+    setFormKey((k) => k + 1);
   }
 
   return {
     addTest,
+    editUser,
     formKey,
     logout,
     message,
+    removeUser,
     selectSkill,
     selectedSkill,
     selectedSkillTests,

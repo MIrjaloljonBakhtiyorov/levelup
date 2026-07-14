@@ -1,4 +1,4 @@
-const DEFAULT_API_URL = "http://localhost:3000/api";
+const DEFAULT_API_URL = "/api";
 
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? DEFAULT_API_URL;
@@ -6,6 +6,20 @@ export const API_BASE_URL =
 type ApiRequestOptions = RequestInit & {
   token?: string;
 };
+
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
+export function isUnauthorizedError(error: unknown) {
+  return error instanceof ApiError && error.status === 401;
+}
 
 export async function apiRequest<T>(
   path: string,
@@ -25,7 +39,10 @@ export async function apiRequest<T>(
   };
 
   if (!response.ok) {
-    throw new Error(payload.message || "Server bilan bog‘lanishda xatolik");
+    throw new ApiError(
+      payload.message || "Server bilan bog‘lanishda xatolik",
+      response.status,
+    );
   }
 
   return payload as T;

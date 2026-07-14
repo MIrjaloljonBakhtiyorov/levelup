@@ -1,22 +1,25 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 
 import { Badge, ProgressBar } from "../components/UserUI";
-
-const WEEKLY_PLAN_KEY = "levelup_weekly_study_plan";
+import { getUserToken } from "../../auth/services/userSession";
+import {
+  createStudyPlan,
+  deleteStudyPlan,
+  getStudyPlans,
+  toggleStudyPlanItem,
+  updateStudyPlan,
+  type StudyPlan,
+  type StudyPlanPayload,
+  type StudyPlanStatus,
+  type StudyPlanType,
+} from "../services/studyPlansApi";
 
 type WeekDay = {
   id: string;
   label: string;
   shortLabel: string;
 };
-
-type WeeklyPlanItem = {
-  id: string;
-  day: string;
-  title: string;
-};
-
-type PlanOwner = "Admin" | "User";
 
 type DailyPlanTask = {
   id: string;
@@ -91,21 +94,6 @@ const dailyPlanTasks: DailyPlanTask[] = [
   },
 ];
 
-function loadStoredPlan() {
-  const storedPlan = localStorage.getItem(WEEKLY_PLAN_KEY);
-
-  if (!storedPlan) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(storedPlan) as WeeklyPlanItem[];
-  } catch {
-    localStorage.removeItem(WEEKLY_PLAN_KEY);
-    return null;
-  }
-}
-
 export function TodayStudyPlanPage() {
   const [completedDailyTasks, setCompletedDailyTasks] = useState<string[]>([]);
   const dailyProgressPercent = Math.round((completedDailyTasks.length / dailyPlanTasks.length) * 100);
@@ -173,10 +161,50 @@ export function TodayStudyPlanPage() {
 }
 
 export function WeeklyStudyPlanPage() {
+  const navigate = useNavigate();
   const [planDraft, setPlanDraft] = useState(defaultPlanDraft);
-  const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlanItem[] | null>(() => loadStoredPlan());
-  const [planOwner, setPlanOwner] = useState<PlanOwner>("User");
-  const totalCount = weeklyPlan?.length ?? 0;
+  const [plans, setPlans] = useState<StudyPlan[]>([]);
+  const [editingPlan, setEditingPlan] = useState<StudyPlan | null>(null);
+  const [title, setTitle] = useState("7 kunlik o'quv reja");
+  const [description, setDescription] = useState("Haftalik dars, test va takrorlash vazifalari.");
+  const [type, setType] = useState<StudyPlanType>("weekly");
+  const [status, setStatus] = useState<StudyPlanStatus>("active");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const activePlan = plans[0] ?? null;
+  const totalCount = activePlan?.items.length ?? 0;
+  const completedCount = activePlan?.items.filter((item) => item.completed).length ?? 0;
+  const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  useEffect(() => {
+    const token = getUserToken();
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    setLoading(true);
+    getStudyPlans(token)
+      .then((result) => {
+        setPlans(result.plans ?? []);
+        setMessage("");
+      })
+      .catch((error: unknown) => {
+        setMessage(error instanceof Error ? error.message : "O'quv rejalarni yuklab bo'lmadi");
+      })
+      .finally(() => setLoading(false));
+  }, [navigate]);
+
+  const summary = useMemo(
+    () => ({
+      active: plans.filter((plan) => plan.status === "active").length,
+      completed: plans.filter((plan) => plan.status === "completed").length,
+      totalTasks: plans.reduce((sum, plan) => sum + plan.items.length, 0),
+    }),
+    [plans],
+  );
 
   function updateDraft(dayId: string, value: string) {
     setPlanDraft((currentDraft) => ({
@@ -185,141 +213,300 @@ export function WeeklyStudyPlanPage() {
     }));
   }
 
-  function confirmWeeklyPlan(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const nextPlan = weekDays
+  function buildPayload(): StudyPlanPayload {
+    return {
+      title: title.trim(),
+      description: description.trim(),
+      type,
+      status,
+      items: weekDays
       .map((day) => ({
-        id: day.id,
         day: day.label,
         title: planDraft[day.id].trim(),
+        details: "",
+        completed: editingPlan?.items.find((item) => item.day === day.label)?.completed ?? false,
       }))
-      .filter((task) => task.title);
-
-    setWeeklyPlan(nextPlan);
-    localStorage.setItem(WEEKLY_PLAN_KEY, JSON.stringify(nextPlan));
+      .filter((task) => task.title),
+    };
   }
 
-  function resetPlan() {
-    setWeeklyPlan(null);
-    localStorage.removeItem(WEEKLY_PLAN_KEY);
+  function resetForm() {
+    setEditingPlan(null);
+    setTitle("7 kunlik o'quv reja");
+    setDescription("Haftalik dars, test va takrorlash vazifalari.");
+    setType("weekly");
+    setStatus("active");
+    setPlanDraft(defaultPlanDraft);
+  }
+
+  function startEdit(plan: StudyPlan) {
+    setEditingPlan(plan);
+    setTitle(plan.title);
+    setDescription(plan.description);
+    setType(plan.type);
+    setStatus(plan.status);
+    setPlanDraft(
+      Object.fromEntries(
+        weekDays.map((day) => [
+          day.id,
+          plan.items.find((item) => item.day === day.label)?.title ?? "",
+        ]),
+      ),
+    );
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const token = getUserToken();
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    const payload = buildPayload();
+
+    if (!payload.title || payload.items.length === 0) {
+      setMessage("Reja nomi va kamida bitta kun uchun vazifa kiriting");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const result = editingPlan
+        ? await updateStudyPlan(token, editingPlan.id, payload)
+        : await createStudyPlan(token, payload);
+
+      setPlans((current) => editingPlan
+        ? current.map((plan) => (plan.id === result.plan.id ? result.plan : plan))
+        : [result.plan, ...current]);
+      setMessage(editingPlan ? "O'quv reja yangilandi" : "Yangi o'quv reja qo'shildi");
+      resetForm();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "O'quv rejani saqlab bo'lmadi");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(planId: string) {
+    const token = getUserToken();
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      await deleteStudyPlan(token, planId);
+      setPlans((current) => current.filter((plan) => plan.id !== planId));
+      if (editingPlan?.id === planId) {
+        resetForm();
+      }
+      setMessage("O'quv reja o'chirildi");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "O'quv rejani o'chirib bo'lmadi");
+    }
+  }
+
+  async function handleToggle(planId: string, itemId: string) {
+    const token = getUserToken();
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const result = await toggleStudyPlanItem(token, planId, itemId);
+      setPlans((current) => current.map((plan) => (plan.id === result.plan.id ? result.plan : plan)));
+      setMessage("");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Vazifa statusi yangilanmadi");
+    }
   }
 
   return (
     <section className="user-page">
       <div className="study-plan-hero">
         <div>
-          <span>Haftalik reja</span>
-          <h1>7 kunlik o‘quv reja</h1>
+          <span>O'quv rejam</span>
+          <h1>Shaxsiy o'quv rejalar</h1>
           <p>
-            Haftalik reja admin yoki user tomonidan tuziladi. Completed qilish
-            faqat bugungi reja to-do listida ishlaydi.
+            Yangi o'quv reja qo'shing, tahrirlang yoki o'chiring. Barcha
+            rejalar backend bazada saqlanadi.
           </p>
         </div>
 
         <div className="study-plan-hero__progress">
-          <strong>{totalCount}/7</strong>
-          <span>{weeklyPlan ? `${planOwner} tomonidan tuzildi` : "Hali tasdiqlanmagan"}</span>
-          <ProgressBar value={Math.round((totalCount / 7) * 100)} tone="blue" />
+          <strong>{progress}%</strong>
+          <span>{completedCount}/{totalCount} completed · {plans.length} reja</span>
+          <ProgressBar value={progress} tone="blue" />
         </div>
       </div>
+
+      {message && <p className="user-alert">{message}</p>}
 
       <div className="study-plan-layout">
         <article className="user-card study-plan-builder">
           <div className="user-section-title user-section-title--split">
             <div>
-              <span>Haftalik reja</span>
-              <h2>Admin yoki user tomonidan tuziladi</h2>
+              <span>{editingPlan ? "Tahrirlash" : "Yangi reja"}</span>
+              <h2>{editingPlan ? "O'quv rejani tahrirlash" : "Yangi o'quv reja qo'shish"}</h2>
             </div>
 
-            {weeklyPlan ? (
-              <Badge tone="green">{planOwner}</Badge>
-            ) : (
-              <Badge tone="blue">Draft</Badge>
-            )}
+            <Badge tone={editingPlan ? "orange" : "blue"}>{editingPlan ? "Edit" : "Create"}</Badge>
           </div>
 
-          {!weeklyPlan ? (
-            <form className="weekly-plan-form" onSubmit={confirmWeeklyPlan}>
-              <div className="weekly-plan-owner" aria-label="Rejani kim tuzadi">
-                {(["User", "Admin"] as PlanOwner[]).map((owner) => (
+          <form className="weekly-plan-form" onSubmit={handleSubmit}>
+            <label className="weekly-plan-field">
+              <span>Reja nomi</span>
+              <input
+                type="text"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder="Masalan: IELTS 30 kunlik reja"
+              />
+            </label>
+
+            <label className="weekly-plan-field">
+              <span>Izoh</span>
+              <input
+                type="text"
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="Reja haqida qisqa izoh"
+              />
+            </label>
+
+            <div className="weekly-plan-owner" aria-label="Reja turi">
+              {(["weekly", "daily", "custom"] as StudyPlanType[]).map((planType) => (
                   <button
-                    className={planOwner === owner ? "is-active" : ""}
-                    key={owner}
+                    className={type === planType ? "is-active" : ""}
+                    key={planType}
                     type="button"
-                    onClick={() => setPlanOwner(owner)}
+                    onClick={() => setType(planType)}
                   >
-                    {owner}
+                    {planType}
                   </button>
                 ))}
-              </div>
+            </div>
 
-              {weekDays.map((day) => (
-                <label className="weekly-plan-field" key={day.id}>
-                  <span>{day.label}</span>
-                  <input
-                    type="text"
-                    value={planDraft[day.id]}
-                    onChange={(event) => updateDraft(day.id, event.target.value)}
-                    placeholder={`${day.label} uchun reja`}
-                  />
-                </label>
+            <div className="weekly-plan-owner" aria-label="Reja statusi">
+              {(["active", "paused", "completed"] as StudyPlanStatus[]).map((planStatus) => (
+                <button
+                  className={status === planStatus ? "is-active" : ""}
+                  key={planStatus}
+                  type="button"
+                  onClick={() => setStatus(planStatus)}
+                >
+                  {planStatus}
+                </button>
               ))}
+            </div>
 
+            {weekDays.map((day) => (
+              <label className="weekly-plan-field" key={day.id}>
+                <span>{day.label}</span>
+                <input
+                  type="text"
+                  value={planDraft[day.id]}
+                  onChange={(event) => updateDraft(day.id, event.target.value)}
+                  placeholder={`${day.label} uchun reja`}
+                />
+              </label>
+            ))}
+
+            <div className="study-plan-actions">
               <button className="user-btn user-btn--primary" type="submit">
-                Haftalik rejani tasdiqlash
+                {saving ? "Saqlanmoqda..." : editingPlan ? "Rejani yangilash" : "Yangi reja qo'shish"}
               </button>
-            </form>
-          ) : (
-            <div className="weekly-plan-summary">
-              <p>
-                Haftalik reja {planOwner.toLowerCase()} tomonidan tuzildi.
-                Bugungi bajariladigan ishlar alohida sahifada completed qilinadi.
-              </p>
-              <button className="user-btn user-btn--secondary" type="button" onClick={resetPlan}>
-                Rejani qayta kiritish
+              <button className="user-btn user-btn--secondary" type="button" onClick={resetForm}>
+                Tozalash
               </button>
             </div>
-          )}
+          </form>
         </article>
 
         <article className="user-card weekly-todo-card">
           <div className="user-section-title user-section-title--split">
             <div>
-              <span>Haftalik reja</span>
-              <h2>7 kunlik reja ko‘rinishi</h2>
+              <span>Rejalar ro'yxati</span>
+              <h2>Saqlangan o'quv rejalar</h2>
             </div>
-            <strong>{totalCount}/7</strong>
+            <strong>{plans.length}</strong>
           </div>
 
-          {weeklyPlan ? (
-            <div className="weekly-todo-list">
-              {weeklyPlan.map((task) => (
-                <div className="weekly-plan-item" key={task.id}>
-                  <span>{task.day}</span>
-                  <strong>{task.title}</strong>
-                  <small>{planOwner}</small>
+          {loading ? (
+            <div className="weekly-todo-empty">O'quv rejalar yuklanmoqda...</div>
+          ) : plans.length > 0 ? (
+            <div className="study-plan-crud-list">
+              {plans.map((plan) => (
+                <div className="study-plan-crud-card" key={plan.id}>
+                  <div className="study-plan-crud-card__top">
+                    <div>
+                      <span>{plan.type} · {plan.status}</span>
+                      <strong>{plan.title}</strong>
+                      <small>{plan.description || "Izoh kiritilmagan"}</small>
+                    </div>
+                    <Badge tone={plan.status === "completed" ? "green" : plan.status === "paused" ? "orange" : "blue"}>
+                      {plan.items.filter((item) => item.completed).length}/{plan.items.length}
+                    </Badge>
+                  </div>
+
+                  <div className="weekly-todo-list">
+                    {plan.items.map((task) => (
+                      <label
+                        className={`weekly-todo-item ${task.completed ? "weekly-todo-item--completed" : ""}`}
+                        key={task.id}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={task.completed}
+                          onChange={() => handleToggle(plan.id, task.id)}
+                        />
+                        <span>{task.day}</span>
+                        <strong>{task.title}</strong>
+                        <small>{task.completed ? "Done" : "Todo"}</small>
+                      </label>
+                    ))}
+                  </div>
+
+                  <div className="study-plan-actions">
+                    <button className="user-btn user-btn--secondary" type="button" onClick={() => startEdit(plan)}>
+                      Tahrirlash
+                    </button>
+                    <button className="user-btn user-btn--ghost" type="button" onClick={() => handleDelete(plan.id)}>
+                      O'chirish
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="weekly-todo-empty">
-              Avval haftalik rejani kiriting va tasdiqlang.
+              Hozircha o'quv reja yo'q. Chap tomondan yangi reja qo'shing.
             </div>
           )}
         </article>
 
         <article className="user-card study-week-strip">
           {weekDays.map((day) => {
-            const task = weeklyPlan?.find((item) => item.id === day.id);
+            const task = activePlan?.items.find((item) => item.day === day.label);
 
             return (
-              <div className={task ? "is-completed" : ""} key={day.id}>
+              <div className={task?.completed ? "is-completed" : ""} key={day.id}>
                 <strong>{day.shortLabel}</strong>
-                <span>{task ? planOwner : "Plan"}</span>
+                <span>{task ? (task.completed ? "Done" : "Todo") : "Plan"}</span>
               </div>
             );
           })}
+        </article>
+
+        <article className="user-card study-plan-summary-strip">
+          <div><span>Active</span><strong>{summary.active}</strong></div>
+          <div><span>Completed</span><strong>{summary.completed}</strong></div>
+          <div><span>Tasks</span><strong>{summary.totalTasks}</strong></div>
         </article>
       </div>
     </section>

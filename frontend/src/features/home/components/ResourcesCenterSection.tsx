@@ -1,117 +1,109 @@
 import "./ResourcesCenterSection.css";
-
-type ResourceAccess = "free" | "premium";
+import { useEffect, useState } from "react";
+import { apiRequest } from "../../../services/apiClient";
+import { useHomeI18n } from "../i18n/HomeI18n";
 
 type ResourceItem = {
-  id: number;
+  id: string;
   icon: string;
   title: string;
   level: string;
   duration: string;
   description: string;
-  access: ResourceAccess;
+  access: "free";
+  category: string;
+  logoUrl: string;
+  mentorName: string;
+  mentorPhotoUrl: string;
 };
 
-const resources: ResourceItem[] = [
-  {
-    id: 1,
-    icon: "♪",
-    title: "English Grammar for beginner and elementary learners (A1)",
-    level: "Elementary",
-    duration: "Number of lessons 14",
-    description: "Anglish Grammar for pre - intermediate learners (B1) uchun mashqlar va testlar.",
+type FreeLessonCourse = {
+  id: string;
+  title: string;
+  category: string;
+  level: string;
+  description: string;
+  lessonCount: number;
+  logoUrl: string;
+  mentorName: string;
+  mentorPhotoUrl: string;
+};
+
+type FreeLessonsResponse = { success: true; courses: FreeLessonCourse[] };
+
+const categoryIcons: Record<string, string> = {
+  IELTS: "I",
+  CEFR: "C",
+  TOEFL: "T",
+  SAT: "S",
+  "General English": "A",
+};
+
+function toResource(course: FreeLessonCourse): ResourceItem {
+  return {
+    id: course.id,
+    icon: categoryIcons[course.category] ?? "▶",
+    title: course.title,
+    level: course.level,
+    duration: `${course.lessonCount} free lessons`,
+    description: course.description,
     access: "free",
-  },
-  {
-    id: 2,
-    icon: "▤",
-    title: "English Grammar for pre - intermediate learners (A2)",
-    level: "Pre-Intermediate",
-    duration: "Number of lessons 24",
-    description: "English Grammar for pre - intermediate learners (B1) uchun mashqlar va testlar.",
-    access: "free",
-  },
-  {
-    id: 3,
-    icon: "✎",
-    title: "English Grammar for intermediate learners (B1)",
-    level: "Intermediate",
-    duration: "Number of lessons 29",
-    description: "English Grammar for intermediate learners (B1) uchun mashqlar va testlar.",
-    access: "premium",
-  },
-  {
-    id: 4,
-    icon: "◉",
-    title: "English Grammar for upper-intermediate learners (B2)",
-    level: "Upper-Intermediate",
-    duration: "Number of lessons 34",
-    description: "Speaking bo‘limi uchun mavzu va savollar.",
-    access: "free",
-  },
-  {
-    id: 5,
-    icon: "A",
-    title: "English Grammar for advanced learners (C1)",
-    level: "Advanced",
-    duration: "Number of lessons 40",
-    description: "C1 daraja uchun murakkab grammatika va amaliy testlar.",
-    access: "premium",
-  },
-  {
-    id: 6,
-    icon: "G",
-    title: "English Grammar for proficient learners (C2)",
-    level: "Proficient",
-    duration: "Number of lessons 38",
-    description: "C2 daraja uchun akademik va professional grammatika mashqlari.",
-    access: "premium",
-  },
-  {
-    id: 7,
-    icon: "▣",
-    title: "IELTS grammar booster for high scores",
-    level: "B2-C1",
-    duration: "Number of lessons 18",
-    description: "IELTS Writing va Speaking uchun yuqori ball grammatikasi.",
-    access: "free",
-  },
-];
+    category: course.category,
+    logoUrl: course.logoUrl,
+    mentorName: course.mentorName,
+    mentorPhotoUrl: course.mentorPhotoUrl,
+  };
+}
 
 function ResourceCard({ resource }: { resource: ResourceItem }) {
+  const { t } = useHomeI18n();
+
   return (
     <article className="resource-card">
-      <div className="resource-card__top">
-        <div className="resource-card__icon" aria-hidden="true">
-          {resource.icon}
-        </div>
+      <div className="resource-card__cover">
+        {resource.logoUrl ? (
+          <img src={resource.logoUrl} alt={`${resource.title} course logo`} loading="lazy" />
+        ) : (
+          <span>{resource.icon}</span>
+        )}
+        <span className="resource-card__category">{resource.category}</span>
+      </div>
 
+      <div className="resource-card__top">
         <span
-          className={
-            resource.access === "premium"
-              ? "resource-card__access resource-card__access--premium"
-              : "resource-card__access resource-card__access--free"
-          }
+          className="resource-card__access resource-card__access--free"
         >
-          {resource.access === "premium" ? "Premium" : "Bepul"}
+          {t("Free")}
         </span>
       </div>
 
-      <h3>{resource.title}</h3>
+      <h3>{t(resource.title)}</h3>
 
       <p className="resource-card__description">
-        {resource.description}
+        {t(resource.description)}
       </p>
+
+      <div className="resource-card__mentor">
+        {resource.mentorPhotoUrl ? (
+          <img src={resource.mentorPhotoUrl} alt={resource.mentorName} loading="lazy" />
+        ) : (
+          <span>{resource.mentorName.slice(0, 1) || "M"}</span>
+        )}
+        <div>
+          <small>Mentor</small>
+          <strong>{resource.mentorName || "Professional mentor"}</strong>
+        </div>
+      </div>
 
       <div className="resource-card__meta">
         <div>
-          <span>Daraja</span>
-          <strong>{resource.level}</strong>
+          <span>{t("Level")}</span>
+          <strong>{t(resource.level)}</strong>
         </div>
 
         <div>
-          <span>Davomiyligi</span>
-          <strong>{resource.duration}</strong>
+          <span>{t("Duration")}</span>
+          <strong>{t(resource.duration)}</strong>
         </div>
       </div>
 
@@ -119,13 +111,13 @@ function ResourceCard({ resource }: { resource: ResourceItem }) {
         <button
           className="resource-card__save"
           type="button"
-          aria-label={`${resource.title} resursini saqlash`}
+          aria-label={`Save ${resource.title}`}
         >
           ♡
         </button>
 
-        <button className="resource-card__open" type="button">
-          Boshlash
+        <button className="resource-card__open" type="button" onClick={() => { window.location.href = "/login"; }}>
+          {t("Start")}
         </button>
       </div>
     </article>
@@ -133,20 +125,22 @@ function ResourceCard({ resource }: { resource: ResourceItem }) {
 }
 
 function MoreResourcesCard() {
+  const { t } = useHomeI18n();
+
   return (
     <article className="resource-card resource-card--more">
       <div className="resource-card__more-icon" aria-hidden="true">
         ↗
       </div>
 
-      <h3>Ko‘proq ko‘rish</h3>
+      <h3>{t("See More")}</h3>
 
       <p className="resource-card__description">
-        Barcha mashqlar, qo‘llanmalar va yangi materiallarni ko‘ring.
+        {t("Browse all exercises, guides, and the latest learning materials.")}
       </p>
 
       <button className="resource-card__more-button" type="button">
-        Barcha resurslar
+        {t("All Resources")}
         <span aria-hidden="true">→</span>
       </button>
     </article>
@@ -154,21 +148,56 @@ function MoreResourcesCard() {
 }
 
 function ResourcesCenterSection() {
-  const visibleResources = resources.slice(0, 7);
+  const { t } = useHomeI18n();
+  const [resources, setResources] = useState<ResourceItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    let retryTimer = 0;
+
+    const loadFreeLessons = (attempt = 0) => {
+      apiRequest<FreeLessonsResponse>("/free-lessons")
+        .then((response) => {
+          if (!active) return;
+          setResources(response.courses.map(toResource));
+          setError("");
+          setLoading(false);
+        })
+        .catch(() => {
+          if (!active) return;
+          if (attempt < 3) {
+            retryTimer = window.setTimeout(() => loadFreeLessons(attempt + 1), 1500);
+            return;
+          }
+          setError("Free lessons could not be loaded.");
+          setLoading(false);
+        });
+    };
+
+    loadFreeLessons();
+    return () => {
+      active = false;
+      window.clearTimeout(retryTimer);
+    };
+  }, []);
+
+  const visibleResources = resources.slice(0, 5);
 
   return (
-    <section className="resources-center-section" id="resources">
+    <section className="resources-center-section" id="free-lessons">
       <div className="resources-center-section__container">
         <header className="resources-center-section__heading">
           <div>
             <span className="resources-center-section__eyebrow">
-              Bepul darslar to'plami
+              {t("Free Lesson Collection")}
             </span>
 
-            <h2>Resurslar markazi</h2>
+            <h2>{t("Resources Center")}</h2>
 
             <p>
-              Imtihonga tayyorlanish uchun kerakli materiallar bir joyda.
+              {t("All the materials you need to prepare for your exam, in one place.")}
             </p>
           </div>
 
@@ -176,17 +205,22 @@ function ResourcesCenterSection() {
             className="resources-center-section__all-button"
             type="button"
           >
-            Barcha resurslar
+            {t("All Resources")}
             <span aria-hidden="true">→</span>
           </button>
         </header>
 
-        <div className="resources-center-section__grid" aria-label="Resurslar ro‘yxati">
+        <div className="resources-center-section__grid" aria-label="Resources list">
+          {loading && <div className="resources-center-section__state">Loading free lessons...</div>}
+          {!loading && error && <div className="resources-center-section__state resources-center-section__state--error">{error}</div>}
+          {!loading && !error && visibleResources.length === 0 && (
+            <div className="resources-center-section__state">No free lessons are available yet.</div>
+          )}
           {visibleResources.map((resource) => (
             <ResourceCard key={resource.id} resource={resource} />
           ))}
 
-          <MoreResourcesCard />
+          {!loading && !error && visibleResources.length > 0 && <MoreResourcesCard />}
         </div>
       </div>
     </section>

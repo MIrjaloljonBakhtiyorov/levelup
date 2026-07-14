@@ -1,54 +1,149 @@
-import { LessonCard, type LessonCardData } from "../components/UserUI";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 
-const lessons: LessonCardData[] = [
-  { category: "IELTS", title: "IELTS Speaking Part 2 starter", duration: "18 daqiqa", level: "Intermediate", mentor: "AI mentor", progress: 62, tone: "blue", accent: "SP" },
-  { category: "CEFR", title: "CEFR Listening B2 practice", duration: "22 daqiqa", level: "B2", mentor: "Madina ustoz", progress: 40, tone: "green", accent: "B2" },
-  { category: "TOEFL", title: "TOEFL note-taking basics", duration: "16 daqiqa", level: "Upper", mentor: "AI mentor", progress: 25, tone: "purple", accent: "NF" },
-  { category: "SAT", title: "SAT Reading evidence questions", duration: "28 daqiqa", level: "Advanced", mentor: "Jasur mentor", progress: 10, tone: "orange", accent: "RW" },
-  { category: "Grammar", title: "Complex sentence masterclass", duration: "20 daqiqa", level: "Intermediate", mentor: "AI mentor", progress: 76, tone: "pink", accent: "GR" },
-  { category: "Vocabulary", title: "Academic words for Writing", duration: "14 daqiqa", level: "B1-B2", mentor: "Dilnoza ustoz", progress: 55, tone: "blue", accent: "AW" },
-  { category: "Beginner", title: "Beginner speaking confidence", duration: "12 daqiqa", level: "Beginner", mentor: "AI mentor", progress: 90, tone: "green", accent: "A1" },
-];
+import { getPublicCourses } from "../../admin/services/adminCoursesApi";
+import type { AdminCourse } from "../../admin/types/adminTypes";
+import { getUserToken } from "../../auth/services/userSession";
+import { EmptyState, LessonCard } from "../components/UserUI";
+import { getStartedCourses, startCourse } from "../services/userCoursesApi";
+import { mapCourseToLessonCard } from "../utils/courseCards";
 
-const lessonFilters = ["Barchasi", "IELTS", "CEFR", "TOEFL", "SAT", "Grammar", "Vocabulary"];
+type FreeLessonCourse = AdminCourse & {
+  lastOpenedAt?: string;
+  progress?: number;
+  startedAt?: string;
+};
 
 function FreeLessonsPage() {
+  const navigate = useNavigate();
+  const [activeFilter, setActiveFilter] = useState("Barchasi");
+  const [courses, setCourses] = useState<FreeLessonCourse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const freeCourses = useMemo(() => courses.filter((course) => course.isFree), [courses]);
+  const lessonFilters = useMemo(
+    () => [
+      "Barchasi",
+      ...Array.from(new Set(freeCourses.flatMap((course) => course.categories))),
+    ],
+    [freeCourses],
+  );
+  const filteredCourses = useMemo(
+    () =>
+      activeFilter === "Barchasi"
+        ? freeCourses
+        : freeCourses.filter((course) => course.categories.includes(activeFilter as never)),
+    [activeFilter, freeCourses],
+  );
+
+  useEffect(() => {
+    const token = getUserToken();
+
+    setLoading(true);
+    Promise.all([
+      getPublicCourses(),
+      token
+        ? getStartedCourses(token).catch(() => ({ success: true as const, courses: [] }))
+        : Promise.resolve({ success: true as const, courses: [] }),
+    ])
+      .then(([publicResult, startedResult]) => {
+        const startedById = new Map((startedResult.courses ?? []).map((course) => [course.id, course]));
+
+        setCourses(
+          (publicResult.courses ?? []).map((course) => {
+            const startedCourse = startedById.get(course.id);
+
+            return {
+              ...course,
+              progress: startedCourse?.progress ?? 0,
+              startedAt: startedCourse?.startedAt,
+              lastOpenedAt: startedCourse?.lastOpenedAt,
+            };
+          }),
+        );
+        setMessage("");
+      })
+      .catch(() => setMessage("Bepul darslarni yuklab bo'lmadi"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleStart(courseId: string) {
+    const token = getUserToken();
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      await startCourse(token, courseId);
+      navigate(`/user/courses/${courseId}/learn`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Kursni boshlashda xatolik");
+    }
+  }
+
   return (
     <section className="user-page">
       <div className="free-lessons-hero">
         <div>
           <span>Bepul darslar</span>
-          <h1>Premium free lessons katalogi</h1>
-          <p>IELTS, CEFR, TOEFL, SAT, grammar va vocabulary bo‘yicha qisqa, foydali va progressga ulangan darslar.</p>
+          <h1>Admin qo'shgan bepul darslar katalogi</h1>
+          <p>
+            Admin panelda bepul qilib qo'shilgan kurslar shu yerda ko'rinadi.
+            Boshlagan darslaringiz esa Kurslarim sahifasiga o'tadi.
+          </p>
         </div>
 
         <div className="free-lessons-hero__stats">
           <div>
-            <strong>7</strong>
+            <strong>{lessonFilters.length - 1}</strong>
             <span>Kategoriya</span>
           </div>
           <div>
-            <strong>42</strong>
-            <span>Mini dars</span>
+            <strong>{freeCourses.length}</strong>
+            <span>Bepul dars</span>
           </div>
           <div>
-            <strong>18m</strong>
-            <span>O‘rtacha vaqt</span>
+            <strong>{filteredCourses.length}</strong>
+            <span>Tanlangan</span>
           </div>
         </div>
       </div>
 
+      {message && <p className="user-alert">{message}</p>}
+
       <div className="lesson-filter-bar" aria-label="Dars kategoriyalari">
-        {lessonFilters.map((filter, index) => (
-          <button className={index === 0 ? "is-active" : ""} type="button" key={filter}>
+        {lessonFilters.map((filter) => (
+          <button
+            className={activeFilter === filter ? "is-active" : ""}
+            type="button"
+            key={filter}
+            onClick={() => setActiveFilter(filter)}
+          >
             {filter}
           </button>
         ))}
       </div>
 
-      <div className="user-card-grid lesson-grid">
-        {lessons.map((lesson) => <LessonCard lesson={lesson} key={lesson.title} />)}
-      </div>
+      {loading ? (
+        <EmptyState title="Darslar yuklanmoqda" text="Backend bazadan bepul darslar olinmoqda." />
+      ) : filteredCourses.length > 0 ? (
+        <div className="user-card-grid lesson-grid">
+          {filteredCourses.map((course) => (
+            <LessonCard
+              lesson={mapCourseToLessonCard(course)}
+              key={course.id}
+              onStart={(lesson) => handleStart(lesson.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          title="Hozircha bepul dars yo'q"
+          text="Admin panelda kurs bepul qilib qo'shilsa, shu yerda avtomatik ko'rinadi."
+        />
+      )}
     </section>
   );
 }

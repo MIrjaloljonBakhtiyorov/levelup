@@ -1,4 +1,5 @@
 .teachers-reviews-section {
+  scroll-margin-top: 76px;
   padding: 0 28px 48px;
   background: var(--color-page);
 }
@@ -84,11 +85,16 @@
   letter-spacing: -0.02em;
 }
 
+.teachers-panel__heading {
+  text-align: center;
+}
+
 .teachers-strip {
   position: relative;
 
   margin-top: 26px;
 
+  padding: 22px 10px 30px;
   overflow: hidden;
 }
 
@@ -117,7 +123,8 @@
 
 .teachers-strip__track {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  gap: 18px;
 
   width: max-content;
 
@@ -130,42 +137,131 @@
 }
 
 .teacher-card {
-  flex: 0 0 310px;
-  min-height: 330px;
+  position: relative;
+  isolation: isolate;
+  flex: 0 0 330px;
+  min-height: 545px;
 
   display: flex;
   flex-direction: column;
 
-  padding: 18px;
+  padding: 17px;
 
   border: 1px solid #e1e7f0;
-  border-radius: 13px;
+  border-radius: 21px;
 
-  background: linear-gradient(180deg, #ffffff, #fbfcff);
+  overflow: hidden;
+  background: linear-gradient(180deg, #ffffff, #f7faff);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, .07);
 
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
-    transform 180ms ease;
+    transform 220ms cubic-bezier(.2,.8,.2,1),
+    flex-basis 220ms cubic-bezier(.2,.8,.2,1),
+    min-height 220ms cubic-bezier(.2,.8,.2,1);
+  cursor: pointer;
+  outline: none;
 }
 
 .teacher-card:hover {
   border-color: #b8d2fb;
-  box-shadow: 0 14px 30px rgba(31, 49, 80, 0.08);
-  transform: translateY(-3px);
+  flex-basis: 354px;
+  min-height: 575px;
+  box-shadow: 0 25px 58px rgba(31, 49, 80, 0.2);
+  transform: translateY(-8px);
 }
+
+.teachers-reviews-section .teacher-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 178px;
+  background: linear-gradient(125deg, #6f96e8 0%, #91b1ef 48%, #78c9db 100%) !important;
+  content: "";
+}
+
+.teachers-reviews-section .teacher-card::after {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: -1;
+  width: 74px;
+  height: 74px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.18);
+  content: "";
+  transform: rotate(14deg);
+}
+
+.teachers-reviews-section .teacher-card--green::before { background: linear-gradient(125deg, #65b99e 0%, #83cfb1 48%, #8bd9b6 100%) !important; }
+.teachers-reviews-section .teacher-card--purple::before { background: linear-gradient(125deg, #a58ad5 0%, #bba2e4 48%, #c99ee5 100%) !important; }
+.teachers-reviews-section .teacher-card--orange::before { background: linear-gradient(125deg, #e49a70 0%, #f0af7c 48%, #f5c17f 100%) !important; }
+.teachers-reviews-section .teacher-card--teal::before { background: linear-gradient(125deg, #65aaa5 0%, #79c2b9 48%, #72c4cf 100%) !important; }
+
+.teacher-card:focus-visible {
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, .2), 0 18px 42px rgba(31, 49, 80, .14);
+}
+
+.teacher-card--active {
+  z-index: 3;
+  flex-basis: 354px;
+  min-height: 575px;
+  border-color: #60a5fa;
+  box-shadow: 0 22px 55px rgba(37, 99, 235, .22), 0 0 0 3px rgba(96, 165, 250, .13);
+  transform: translateY(-7px) scale(1.035);
+}
+
+.teacher-card--active:hover { transform: translateY(-9px) scale(1.035); }
+
+.teacher-card--active .teacher-card__premium {
+  color: #1d4ed8;
+}
+
+.teacher-card__premium {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 12px;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-shadow: 0 2px 7px rgba(0, 0, 0, .28);
+  width: fit-content;
+  min-height: 26px;
+  margin-right: auto;
+  margin-left: auto;
+  padding: 0 11px;
+  border: 1px solid rgba(255, 255, 255, .55);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, .22);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, .14);
+}
+
+.teacher-card__premium span { color: #fde047; font-size: 12px; text-shadow: 0 2px 6px rgba(0,0,0,.25); }
 
 .teacher-card__photo {
   position: relative;
 
-  width: 100%;
-  height: 180px;
+  width: 184px;
+  height: 184px;
+  margin: 0 auto;
 
   overflow: hidden;
 
-  border-radius: 12px;
+  border: 6px solid #fff;
+  border-radius: 50%;
 
   background: #e8f1ff;
+  box-shadow: 0 0 0 4px #bfdbfe, 0 18px 40px rgba(37, 99, 235, .25);
+  transition: box-shadow 220ms ease, transform 220ms ease;
+}
+
+.teacher-card--active .teacher-card__photo {
+  box-shadow: 0 0 0 4px #93c5fd, 0 20px 40px rgba(37, 99, 235, .28);
+  transform: scale(1.035);
 }
 
 .teacher-card__photo img {
@@ -176,12 +272,13 @@
 
   object-fit: cover;
   object-position: center 22%;
+  transform-origin: center 28%;
 }
 
 .teacher-card__photo span {
   position: absolute;
-  right: 12px;
-  bottom: 12px;
+  right: -3px;
+  bottom: 8px;
 
   width: 42px;
   height: 42px;
@@ -218,7 +315,8 @@
 }
 
 .teacher-card__body {
-  margin-top: 16px;
+  margin-top: 14px;
+  text-align: center;
 }
 
 .teacher-card__body strong {
@@ -237,6 +335,98 @@
   color: #667085;
   font-size: 13px;
 }
+
+.teacher-card__body .teacher-card__exam {
+  display: inline-flex;
+  margin-top: 7px;
+  padding: 4px 10px;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.teacher-card__scores {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin-top: 15px;
+}
+
+.teacher-card__scores--2 { grid-template-columns: repeat(2, 1fr); }
+
+.teacher-card__scores div,
+.teacher-card__summary div {
+  min-width: 0;
+  padding: 10px 4px;
+  border: 1px solid #d9e3f0;
+  border-radius: 12px;
+  background: rgba(255,255,255,.85);
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, .07);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.teacher-card__scores div:nth-child(1) { border-color: #bfdbfe; background: #eff6ff; }
+.teacher-card__scores div:nth-child(2) { border-color: #bbf7d0; background: #f0fdf4; }
+.teacher-card__scores div:nth-child(3) { border-color: #ddd6fe; background: #f5f3ff; }
+.teacher-card__scores div:nth-child(4) { border-color: #fed7aa; background: #fff7ed; }
+
+.teacher-card__scores div:hover {
+  border-color: #bfdbfe;
+  background: #f8fbff;
+  transform: translateY(-2px);
+}
+
+.teacher-card__scores span,
+.teacher-card__summary span {
+  display: block;
+  overflow: hidden;
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+}
+
+.teacher-card__scores strong,
+.teacher-card__summary strong {
+  display: block;
+  margin-top: 4px;
+  color: #101828;
+  font-size: 15px;
+}
+
+.teacher-card__summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.teacher-card__summary div:first-child {
+  border-color: #93c5fd;
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+}
+
+.teacher-card__summary div:last-child {
+  border-color: #cbd5e1;
+  background: linear-gradient(145deg, #fff, #eef2f7);
+}
+
+.teacher-card__summary div:first-child strong { color: #2563eb; }
+
+.teacher-card__experience {
+  margin: 10px 0;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.teacher-card__experience span { color: #f59e0b; }
 
 .teacher-card__meta {
   display: flex;
@@ -265,24 +455,53 @@
 .teacher-card button {
   min-height: 42px;
 
-  margin-top: auto;
+  margin-top: 0;
 
   border: 1px solid #3b82f6;
-  border-radius: 9px;
+  border-radius: 10px;
 
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff, #f5f9ff);
   color: #2563eb;
 
   font-size: 13px;
   font-weight: 900;
 
   cursor: pointer;
+  box-shadow: 0 5px 14px rgba(37, 99, 235, .08);
+  transition: color 180ms ease, background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
+.teacher-card button:hover,
+.teacher-card--active button {
+  border-color: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #fff;
+  box-shadow: 0 9px 20px rgba(37, 99, 235, .22);
+}
+
+.teacher-card button:active { transform: scale(.98); }
+
 .course-reviews {
+  display: block;
+}
+
+.course-reviews__intro {
   display: grid;
-  grid-template-columns: minmax(260px, 0.38fr) minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: minmax(280px, 1fr) minmax(520px, .9fr);
+  grid-template-rows: auto auto 1fr;
+  column-gap: 38px;
+  align-items: start;
+}
+
+.course-reviews__intro > span,
+.course-reviews__intro > h3,
+.course-reviews__intro > p {
+  grid-column: 1;
+}
+
+.course-reviews__intro > span {
+  justify-self: start;
+  width: auto;
 }
 
 .course-reviews__intro h3 {
@@ -294,8 +513,72 @@
   letter-spacing: -0.02em;
 }
 
+.course-reviews__intro > p {
+  max-width: 370px;
+  margin-top: 10px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.course-reviews__stats {
+  grid-column: 2;
+  grid-row: 1 / 4;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 0;
+}
+
+.course-reviews__stats div {
+  min-height: 86px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px;
+  border: 1px solid #dbe7f7;
+  border-radius: 13px;
+  background: linear-gradient(145deg, #eff6ff, #ffffff);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, .06);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.course-reviews__stats div:hover {
+  box-shadow: 0 13px 28px rgba(15, 23, 42, .1);
+  transform: translateY(-3px);
+}
+
+.course-reviews__stats div:nth-child(1) { border-color: #93c5fd; background: linear-gradient(145deg, #eef5ff, #ffffff); }
+.course-reviews__stats div:nth-child(2) { border-color: #86efac; background: linear-gradient(145deg, #effcf4, #ffffff); }
+.course-reviews__stats div:nth-child(3) { border-color: #c4b5fd; background: linear-gradient(145deg, #f5f1ff, #ffffff); }
+.course-reviews__stats div:nth-child(4) { border-color: #fdba74; background: linear-gradient(145deg, #fff6eb, #ffffff); }
+.course-reviews__stats div:nth-child(2) strong { color: #059669; }
+.course-reviews__stats div:nth-child(3) strong { color: #7c3aed; }
+.course-reviews__stats div:nth-child(4) strong { color: #ea580c; }
+
+.course-reviews__stats strong {
+  display: block;
+  color: #2563eb;
+  font-size: 21px;
+  line-height: 1.1;
+}
+
+.course-reviews__stats small {
+  display: block;
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 800;
+}
+
 .course-reviews__viewport {
+  position: relative;
+  margin-top: 24px;
+  padding: 4px 0 8px;
   overflow: hidden;
+  border-radius: 16px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
 }
 
 .course-reviews__track {
@@ -304,20 +587,21 @@
 
   width: max-content;
 
-  animation: reviews-carousel 18s ease-in-out infinite;
+  animation: reviews-carousel 52s linear infinite;
 }
 
 .course-review-card {
-  flex: 0 0 360px;
-  min-height: 230px;
+  position: relative;
+  flex: 0 0 345px;
+  min-height: 305px;
 
   display: flex;
   flex-direction: column;
 
-  padding: 20px;
+  padding: 22px;
 
   border: 1px solid #e1e7f0;
-  border-radius: 13px;
+  border-radius: 16px;
 
   background:
     radial-gradient(
@@ -326,6 +610,47 @@
       transparent 35%
     ),
     linear-gradient(180deg, #ffffff, #fbfcff);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .055);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  overflow: hidden;
+}
+
+.course-review-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: #3b82f6;
+  content: "";
+}
+
+.course-review-card:nth-child(4n + 2) {
+  border-color: #bbf7d0;
+  background: radial-gradient(circle at 100% 0%, rgba(16,185,129,.075), transparent 38%), linear-gradient(180deg,#fff,#f7fdf9);
+}
+.course-review-card:nth-child(4n + 2)::before { background: #10b981; }
+.course-review-card:nth-child(4n + 2) .course-review-card__avatar { background: #dcfce7; color: #059669; }
+.course-review-card:nth-child(4n + 2) .course-review-card__result strong { color: #059669; }
+
+.course-review-card:nth-child(4n + 3) {
+  border-color: #ddd6fe;
+  background: radial-gradient(circle at 100% 0%, rgba(124,58,237,.075), transparent 38%), linear-gradient(180deg,#fff,#faf8ff);
+}
+.course-review-card:nth-child(4n + 3)::before { background: #8b5cf6; }
+.course-review-card:nth-child(4n + 3) .course-review-card__avatar { background: #ede9fe; color: #7c3aed; }
+.course-review-card:nth-child(4n + 3) .course-review-card__result strong { color: #7c3aed; }
+
+.course-review-card:nth-child(4n) {
+  border-color: #fed7aa;
+  background: radial-gradient(circle at 100% 0%, rgba(249,115,22,.075), transparent 38%), linear-gradient(180deg,#fff,#fffbf5);
+}
+.course-review-card:nth-child(4n)::before { background: #f97316; }
+.course-review-card:nth-child(4n) .course-review-card__avatar { background: #ffedd5; color: #ea580c; }
+.course-review-card:nth-child(4n) .course-review-card__result strong { color: #ea580c; }
+
+.course-review-card:hover {
+  border-color: #bfdbfe;
+  box-shadow: 0 14px 32px rgba(37, 99, 235, .11);
+  transform: translateY(-3px);
 }
 
 .course-review-card__top {
@@ -348,7 +673,22 @@
 
   font-size: 13px;
   font-weight: 950;
+  overflow: hidden;
+  border: 2px solid #bfdbfe;
+  box-shadow: 0 5px 14px rgba(37, 99, 235, .16);
 }
+
+.course-review-card__avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.course-review-card:nth-child(4n + 2) .course-review-card__avatar { border-color: #86efac; }
+.course-review-card:nth-child(4n + 3) .course-review-card__avatar { border-color: #c4b5fd; }
+.course-review-card:nth-child(4n) .course-review-card__avatar { border-color: #fdba74; }
 
 .course-review-card__top strong {
   display: block;
@@ -370,8 +710,8 @@
   margin-top: 16px;
 
   color: #475467;
-  font-size: 14px;
-  line-height: 1.65;
+  font-size: 13px;
+  line-height: 1.72;
 }
 
 .course-review-card__result {
@@ -396,9 +736,12 @@
 }
 
 @media (max-width: 900px) {
-  .course-reviews {
-    grid-template-columns: 1fr;
-  }
+  .course-reviews__intro { grid-template-columns: 1fr; }
+  .course-reviews__intro > span,
+  .course-reviews__intro > h3,
+  .course-reviews__intro > p,
+  .course-reviews__stats { grid-column: 1; }
+  .course-reviews__stats { grid-row: auto; margin-top: 16px; }
 
   .course-review-card {
     flex-basis: min(82vw, 360px);
@@ -414,19 +757,35 @@
     width: 100%;
   }
 
+  .teachers-reviews-section__heading h2 { font-size: 25px; }
+  .teachers-reviews-section__heading p { font-size: 12px; line-height: 1.55; }
+
   .teachers-panel,
-  .reviews-panel {
-    padding: 22px;
-  }
+  .reviews-panel { padding: 16px; border-radius: 14px; }
+
+  .teachers-panel__heading h3 { font-size: 21px; }
+  .teachers-strip { margin-top: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .teachers-strip::-webkit-scrollbar { display: none; }
+  .teachers-strip__track { animation: none; }
 
   .teachers-strip::before,
   .teachers-strip::after {
     width: 34px;
   }
 
-  .teacher-card {
-    flex-basis: min(82vw, 310px);
-  }
+  .teacher-card { flex-basis: min(84vw, 310px); min-height: 520px; padding: 15px; scroll-snap-align: start; }
+  .teacher-card:hover,
+  .teacher-card--active { flex-basis: min(87vw, 325px); min-height: 540px; transform: translateY(-4px); }
+  .teacher-card__photo { width: 170px; height: 170px; }
+  .teacher-card__body strong { font-size: 18px; }
+  .teacher-card__scores div,
+  .teacher-card__summary div { padding: 9px 3px; }
+
+  .course-reviews__viewport { overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .course-reviews__stats { grid-template-columns: repeat(2, 1fr); }
+  .course-reviews__viewport::-webkit-scrollbar { display: none; }
+  .course-reviews__track { animation: none; }
+  .course-review-card { flex-basis: min(80vw, 290px); scroll-snap-align: start; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -452,22 +811,11 @@
 }
 
 @keyframes reviews-carousel {
-  0%,
-  24% {
-    transform: translateX(0);
+  from {
+    transform: translateX(calc(-50% - 8px));
   }
 
-  33%,
-  57% {
-    transform: translateX(-376px);
-  }
-
-  66%,
-  90% {
-    transform: translateX(-752px);
-  }
-
-  100% {
+  to {
     transform: translateX(0);
   }
 }

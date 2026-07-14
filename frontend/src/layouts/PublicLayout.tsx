@@ -1,17 +1,22 @@
 import { Outlet } from "react-router";
 
 import SiteFooter from "../components/footer/SiteFooter";
+import TopBar from "../components/navigation/TopBar";
 import Navbar from "../components/navigation/Navbar";
-
+import { HomeI18nProvider } from "../features/home/i18n/HomeI18n";
+// public layouts
 function PublicLayout() {
   return (
-    <div className="public-layout">
-      <Navbar />
+    <HomeI18nProvider>
+      <div className="public-layout">
+        <TopBar />
+        <Navbar />
 
-      <Outlet />
+        <Outlet />
 
-      <SiteFooter />
-    </div>
+        <SiteFooter />
+      </div>
+    </HomeI18nProvider>
   );
 }
 

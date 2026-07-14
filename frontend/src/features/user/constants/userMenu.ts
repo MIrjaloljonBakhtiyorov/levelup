@@ -1,11 +1,14 @@
+export type UserMenuChild = {
+  path: string;
+  label: string;
+  color?: string;
+};
+
 export type UserMenuItem = {
   path: string;
   label: string;
   icon: string;
-  children?: {
-    path: string;
-    label: string;
-  }[];
+  children?: UserMenuChild[];
 };
 
 export const userMenu: UserMenuItem[] = [
@@ -28,10 +31,10 @@ export const userMenu: UserMenuItem[] = [
     label: "Testlar",
     icon: "T",
     children: [
-      { path: "/user/tests/ielts", label: "IELTS" },
-      { path: "/user/tests/cefr", label: "CEFR" },
-      { path: "/user/tests/toefl", label: "TOEFL" },
-      { path: "/user/tests/sat", label: "SAT" },
+      { path: "/user/tests/ielts", label: "IELTS", color: "ielts" },
+      { path: "/user/tests/cefr", label: "CEFR", color: "cefr" },
+      { path: "/user/tests/toefl", label: "TOEFL", color: "toefl" },
+      { path: "/user/tests/sat", label: "SAT", color: "sat" },
     ],
   },
   { path: "/user/resources", label: "Resurslar", icon: "Q" },

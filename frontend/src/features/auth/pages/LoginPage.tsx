@@ -38,7 +38,7 @@ function LoginPage() {
         const result = await loginUser(data);
         clearAdminToken();
         setUserSession(result.token, result.user);
-        navigate("/");
+        navigate("/user/dashboard", { replace: true });
         return;
       }
 
@@ -49,7 +49,7 @@ function LoginPage() {
       navigate("/admin", { replace: true });
     } catch (error) {
       setFormMessage(
-        error instanceof Error ? error.message : "Login yoki parol noto‘g‘ri",
+        error instanceof Error ? "Incorrect email, username, or password." : "Unable to sign in.",
       );
       return;
     }
@@ -58,13 +58,12 @@ function LoginPage() {
   return (
     <div className="auth-form">
       <div className="auth-form__header">
-        <span className="auth-form__eyebrow">Xush kelibsiz</span>
+        <span className="auth-form__eyebrow">Welcome back</span>
 
-        <h2>Hisobingizga kiring</h2>
+        <h2>Sign in to your account</h2>
 
         <p>
-          O‘quv rejangizni davom ettiring, test natijalarini ko‘ring va
-          kurslarni to‘xtagan joyingizdan boshlang.
+          Continue your study plan, review your test results, and resume your courses.
         </p>
       </div>
 
@@ -76,12 +75,12 @@ function LoginPage() {
         {formMessage && <p className="auth-alert">{formMessage}</p>}
 
         <div className="auth-field">
-          <label htmlFor="login-username">Email yoki admin login</label>
+          <label htmlFor="login-username">Email or admin username</label>
 
           <input
             id="login-username"
             type="text"
-            placeholder="example@email.com yoki mister_italiano"
+            placeholder="example@email.com or admin username"
             autoComplete="username"
             aria-invalid={Boolean(errors.login)}
             {...register("login")}
@@ -94,16 +93,16 @@ function LoginPage() {
 
         <div className="auth-field">
           <div className="auth-field__label-row">
-            <label htmlFor="login-password">Parol</label>
+            <label htmlFor="login-password">Password</label>
 
-            <span>User yoki admin parol</span>
+            <span>User or admin password</span>
           </div>
 
           <div className="auth-password">
             <input
               id="login-password"
               type={showPassword ? "text" : "password"}
-              placeholder="Parolingizni kiriting"
+              placeholder="Enter your password"
               autoComplete="current-password"
               aria-invalid={Boolean(errors.password)}
               {...register("password")}
@@ -113,7 +112,7 @@ function LoginPage() {
               type="button"
               onClick={() => setShowPassword((current) => !current)}
             >
-              {showPassword ? "Yashirish" : "Ko‘rsatish"}
+              {showPassword ? "Hide" : "Show"}
             </button>
           </div>
 
@@ -127,21 +126,21 @@ function LoginPage() {
         <label className="auth-checkbox">
           <input type="checkbox" {...register("rememberMe")} />
 
-          <span>Eslab qolish</span>
+          <span>Remember me</span>
         </label>
 
         <button className="auth-submit" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Kirilmoqda..." : "Kirish"}
+          {isSubmitting ? "Signing in..." : "Sign in"}
         </button>
       </form>
 
       <p className="auth-form__switch">
-        Hisobingiz yo‘qmi?
-        <Link to="/register"> Ro‘yxatdan o‘ting</Link>
+        Don&apos;t have an account?
+        <Link to="/register"> Create one</Link>
       </p>
 
       <Link className="auth-back-link" to="/">
-        ← Bosh sahifaga qaytish
+        ← Back to home
       </Link>
     </div>
   );
