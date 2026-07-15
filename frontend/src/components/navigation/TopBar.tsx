@@ -1,5 +1,5 @@
 import "./TopBar.css";
-import { useHomeI18n } from "../../features/home/i18n/HomeI18n";
+import { useHomeI18n } from "../../features/home/i18n/HomeI18nContext";
 
 function TopBar() {
   const { t } = useHomeI18n();

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { createRegisterSchema, type RegisterFormData } from "../schemas/authSchemas";
 import { registerUser } from "../services/authApi";
@@ -11,7 +11,7 @@ import {
   setOnboardingRedirectTarget,
   setUserSession,
 } from "../services/userSession";
-import { useHomeI18n } from "../../home/i18n/HomeI18n";
+import { useHomeI18n } from "../../home/i18n/HomeI18nContext";
 
 function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +25,7 @@ function RegisterPage() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     trigger,
     formState: { errors, isSubmitting, isSubmitted },
   } = useForm<RegisterFormData>({
@@ -42,12 +42,12 @@ function RegisterPage() {
     },
   });
 
-  const firstName = watch("firstName");
-  const lastName = watch("lastName");
-  const middleName = watch("middleName");
-  const phoneNumber = watch("phoneNumber");
-  const email = watch("email");
-  const acceptTerms = watch("acceptTerms");
+  const firstName = useWatch({ control, name: "firstName" });
+  const lastName = useWatch({ control, name: "lastName" });
+  const middleName = useWatch({ control, name: "middleName" });
+  const phoneNumber = useWatch({ control, name: "phoneNumber" });
+  const email = useWatch({ control, name: "email" });
+  const acceptTerms = useWatch({ control, name: "acceptTerms" });
 
   useEffect(() => {
     saveRegisterDraft({ firstName, lastName, middleName, phoneNumber, email, acceptTerms });

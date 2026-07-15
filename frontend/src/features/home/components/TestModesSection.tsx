@@ -1,6 +1,6 @@
 import "./TestModesSection.css";
 import { useNavigate } from "react-router";
-import { useHomeI18n } from "../i18n/HomeI18n";
+import { useHomeI18n } from "../i18n/HomeI18nContext";
 
 const waveformBars = [
   10, 17, 25, 15, 34, 23, 40, 18, 30, 45, 22, 37, 16, 28, 43, 21, 35,

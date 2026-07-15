@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 
-import { useHomeI18n } from "../../features/home/i18n/HomeI18n";
+import { useHomeI18n } from "../../features/home/i18n/HomeI18nContext";
 import "./SiteFooter.css";
 
 const footerGroups = [

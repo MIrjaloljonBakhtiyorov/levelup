@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 
-import { type HomeLanguage, useHomeI18n } from "../../home/i18n/HomeI18n";
+import { type HomeLanguage, useHomeI18n } from "../../home/i18n/HomeI18nContext";
 import "../styles/legal.css";
 
 type DocumentKind = "terms" | "privacy";

@@ -1,13 +1,12 @@
-import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
+import {
+  HomeI18nContext,
+  type HomeI18nContextValue,
+  type HomeLanguage,
+  type TranslationValues,
+} from "./HomeI18nContext";
 
-export type HomeLanguage = "uz" | "ru" | "en";
-type TranslationValues = Record<string, string | number>;
-
-type HomeI18nContextValue = {
-  language: HomeLanguage;
-  setLanguage: (language: HomeLanguage) => void;
-  t: (text: string, values?: TranslationValues) => string;
-};
+export type { HomeLanguage } from "./HomeI18nContext";
 
 const HOME_LANGUAGE_KEY = "levelup_user_language";
 const HOME_PAGE_TITLE = "LevelUp — English exam preparation";
@@ -683,8 +682,6 @@ function translateHomeText(text: string, language: HomeLanguage, values?: Transl
   ));
 }
 
-const HomeI18nContext = createContext<HomeI18nContextValue | null>(null);
-
 export function HomeI18nProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<HomeLanguage>(() => getInitialLanguage());
 
@@ -704,12 +701,4 @@ export function HomeI18nProvider({ children }: { children: ReactNode }) {
   );
 
   return <HomeI18nContext.Provider value={value}>{children}</HomeI18nContext.Provider>;
-}
-
-export function useHomeI18n() {
-  const context = useContext(HomeI18nContext);
-  if (!context) {
-    throw new Error("useHomeI18n must be used inside HomeI18nProvider");
-  }
-  return context;
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 
 import { clearUserSession, getUserProfile } from "../../features/auth/services/userSession";
-import { useHomeI18n, type HomeLanguage } from "../../features/home/i18n/HomeI18n";
+import { useHomeI18n, type HomeLanguage } from "../../features/home/i18n/HomeI18nContext";
 import "./Navbar.css";
 
 type NavigationItem = {

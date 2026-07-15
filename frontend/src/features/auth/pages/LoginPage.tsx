@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { createLoginSchema, type LoginFormData } from "../schemas/authSchemas";
 import { loginAdmin, loginUser } from "../services/authApi";
@@ -12,7 +12,7 @@ import {
   clearUserSession,
   setUserSession,
 } from "../services/userSession";
-import { useHomeI18n } from "../../home/i18n/HomeI18n";
+import { useHomeI18n } from "../../home/i18n/HomeI18nContext";
 
 function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +25,7 @@ function LoginPage() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     trigger,
     formState: { errors, isSubmitting, isSubmitted },
   } = useForm<LoginFormData>({
@@ -37,8 +37,8 @@ function LoginPage() {
     },
   });
 
-  const login = watch("login");
-  const rememberMe = watch("rememberMe");
+  const login = useWatch({ control, name: "login" });
+  const rememberMe = useWatch({ control, name: "rememberMe" });
 
   useEffect(() => {
     saveLoginDraft({ login, rememberMe });

@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router";
 
-import { useHomeI18n, type HomeLanguage } from "../i18n/HomeI18n";
+import { useHomeI18n, type HomeLanguage } from "../i18n/HomeI18nContext";
 import "./FinalCtaSection.css";
 
 function FinalCtaSection() {

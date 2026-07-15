@@ -2,25 +2,22 @@ import { z } from "zod";
 
 export type AuthTranslate = (text: string) => string;
 
-const loginFields = z.object({
-  login: z.string(),
-  password: z.string(),
-  rememberMe: z.boolean(),
-});
+export type LoginFormData = {
+  login: string;
+  password: string;
+  rememberMe: boolean;
+};
 
-const registerFields = z.object({
-  firstName: z.string(),
-  lastName: z.string(),
-  middleName: z.string(),
-  phoneNumber: z.string(),
-  email: z.string(),
-  password: z.string(),
-  confirmPassword: z.string(),
-  acceptTerms: z.boolean(),
-});
-
-export type LoginFormData = z.infer<typeof loginFields>;
-export type RegisterFormData = z.infer<typeof registerFields>;
+export type RegisterFormData = {
+  firstName: string;
+  lastName: string;
+  middleName: string;
+  phoneNumber: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  acceptTerms: boolean;
+};
 
 export function createLoginSchema(t: AuthTranslate) {
   return z.object({

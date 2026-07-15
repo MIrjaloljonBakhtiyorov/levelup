@@ -1,5 +1,5 @@
 import "./PartnersSection.css";
-import { useHomeI18n } from "../i18n/HomeI18n";
+import { useHomeI18n } from "../i18n/HomeI18nContext";
 
 type PartnerItem = {
   id: number;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useHomeI18n } from "../i18n/HomeI18n";
+import { useHomeI18n } from "../i18n/HomeI18nContext";
 import "./HeroSection.css";
 
 const CARDS = [

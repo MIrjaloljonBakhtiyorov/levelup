@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Outlet } from "react-router";
 
-import { type HomeLanguage, useHomeI18n } from "../../home/i18n/HomeI18n";
+import { type HomeLanguage, useHomeI18n } from "../../home/i18n/HomeI18nContext";
 import "../styles/auth.css";
 
 function AuthLayout() {

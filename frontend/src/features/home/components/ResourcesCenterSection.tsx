@@ -1,7 +1,7 @@
 import "./ResourcesCenterSection.css";
 import { useEffect, useState } from "react";
 import { apiRequest } from "../../../services/apiClient";
-import { useHomeI18n } from "../i18n/HomeI18n";
+import { useHomeI18n } from "../i18n/HomeI18nContext";
 
 type ResourceItem = {
   id: string;
