@@ -709,6 +709,10 @@
   .onboarding-option {
     min-height: 50px;
   }
+
+  .onboarding-page--center {
+    padding: 0;
+  }
 }
 
 @media (max-height: 700px) and (min-width: 921px) {

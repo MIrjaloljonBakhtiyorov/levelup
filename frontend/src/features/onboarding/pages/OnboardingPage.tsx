@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 import "../styles/onboarding.css";
@@ -95,6 +95,7 @@ const initialAnswers: OnboardingAnswer = {
 function OnboardingPage() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [answers, setAnswers] = useState<OnboardingAnswer>(initialAnswers);
+  const questionHeadingRef = useRef<HTMLHeadingElement>(null);
   const navigate = useNavigate();
 
   const currentStep = onboardingSteps[currentStepIndex];
@@ -119,8 +120,16 @@ function OnboardingPage() {
     }));
   }
 
+  function focusCurrentQuestion() {
+    window.requestAnimationFrame(() => {
+      questionHeadingRef.current?.focus({ preventScroll: true });
+      questionHeadingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
   function goBack() {
     setCurrentStepIndex((stepIndex) => Math.max(0, stepIndex - 1));
+    focusCurrentQuestion();
   }
 
   function continueOnboarding() {
@@ -132,6 +141,7 @@ function OnboardingPage() {
 
     if (!isLastStep) {
       setCurrentStepIndex((stepIndex) => stepIndex + 1);
+      focusCurrentQuestion();
       return;
     }
 
@@ -160,7 +170,7 @@ function OnboardingPage() {
           <div className="onboarding-panel__bottom">
             <div className="onboarding-mentor">
               <img
-                src="https://i.pinimg.com/736x/39/66/f2/3966f2a6890b2951d3e9c927aa7b3378.jpg"
+                src="/images/teachers/gulbahor-sulaymonova.jpg"
                 alt="LevelUp study mentor"
               />
             </div>
@@ -195,14 +205,21 @@ function OnboardingPage() {
               <span>Step {currentStepIndex + 1}</span>
               <strong>{progressPercent}%</strong>
             </div>
-            <div className="onboarding-progress__track">
+            <div
+              className="onboarding-progress__track"
+              role="progressbar"
+              aria-label="Onboarding progress"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progressPercent}
+            >
               <span style={{ width: `${progressPercent}%` }} />
             </div>
           </div>
 
           <div className="onboarding-question">
             <span>{currentStep.subtitle}</span>
-            <h2>{currentStep.question}</h2>
+            <h2 ref={questionHeadingRef} tabIndex={-1}>{currentStep.question}</h2>
           </div>
 
           <div className="onboarding-options">
@@ -216,6 +233,7 @@ function OnboardingPage() {
                   }`}
                   key={option}
                   type="button"
+                  aria-pressed={isSelected}
                   onClick={() => selectOption(option)}
                 >
                   <span>{option}</span>

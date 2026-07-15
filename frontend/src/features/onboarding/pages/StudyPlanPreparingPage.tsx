@@ -12,18 +12,6 @@ function StudyPlanPreparingPage() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const currentUrl = window.location.href;
-    window.history.pushState({ preparing: true }, "", currentUrl);
-
-    const preventBackNavigation = () => {
-      window.history.pushState({ preparing: true }, "", currentUrl);
-    };
-
-    window.addEventListener("popstate", preventBackNavigation);
-    return () => window.removeEventListener("popstate", preventBackNavigation);
-  }, []);
-
-  useEffect(() => {
     const duration = 20_000;
     const startedAt = performance.now();
     let frameId = 0;
@@ -64,7 +52,14 @@ function StudyPlanPreparingPage() {
           <p className="study-plan-preparing__status">Loading</p>
           <strong className="study-plan-preparing__percentage">{progress}%</strong>
 
-          <div className="study-plan-preparing__progress" aria-label={`${progress}% complete`}>
+          <div
+            className="study-plan-preparing__progress"
+            role="progressbar"
+            aria-label="Study plan preparation progress"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progress}
+          >
             <span style={{ width: `${progress}%` }} />
           </div>
 
