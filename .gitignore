@@ -1,0 +1,10 @@
+**/node_modules/
+
+# Backend runtime data; seed content remains tracked.
+backend/data/admin_logs.json
+backend/data/lesson_notes.json
+backend/data/security.json
+backend/data/study_plans.json
+backend/data/teachers.json
+backend/data/user_courses.json
+backend/data/users.json
